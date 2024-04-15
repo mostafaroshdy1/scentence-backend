@@ -1,8 +1,9 @@
-import mongoose from 'mongoose';
+import mongoose from "mongoose";
 
-export { connectToDB }
-const dbName = `db`
+export { connectToDB };
+const dbName = `dbName`;
+const dbUrl = process.env.DB_URL || `mongodb://127.0.0.1:27017/${dbName}`;
 async function connectToDB() {
-    await mongoose.connect(`mongodb://127.0.0.1:27017/${dbName}`);
-    console.log(`Connected to Database: ${dbName}`);
+  await mongoose.connect(dbUrl);
+  console.log(`Connected to Database: ${dbName}`);
 }

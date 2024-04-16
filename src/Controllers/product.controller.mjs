@@ -92,10 +92,20 @@ const deleteProductById = catchAsync(async (req, res) => {
   return res.status(200).json({ message: "Product deleted successfully" });
 });
 
+const searchProduct = catchAsync(async (req, res) => {
+  const { search } = req.query;
+  const result = await Product.find({ title: { $regex: search, $options: "i" } });
+  if(result.length === 0){
+    return res.status(404).json({ message: "Product Not Found" });
+  }
+  return res.status(200).json(result);
+}); 
+
 export {
   createProduct,
   getAllProducts,
   getProductById,
   updateProductById,
   deleteProductById,
+  searchProduct
 };

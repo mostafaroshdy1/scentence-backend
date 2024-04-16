@@ -11,6 +11,7 @@ import {
   getProductById,
   updateProductById,
   deleteProductById,
+  searchProduct
 } from "../Controllers/product.controller.mjs";
 import { AddProductValidation } from "../Validation/products.mjs";
 
@@ -26,6 +27,8 @@ router.post(
 
 router.get("/", getAllProducts);
 
+router.get("/search", searchProduct);
+
 router.get("/:id", getProductById);
 
 router.put(
@@ -37,5 +40,6 @@ router.put(
 );
 
 router.delete("/:id", deleteProductById);
+
 
 export default router;

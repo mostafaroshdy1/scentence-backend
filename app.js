@@ -2,6 +2,7 @@ import express from "express";
 import { connectToDB } from "./src/utils/db.mjs";
 import { ExpressError } from "./src/utils/ExpressError.mjs";
 import productRouter from "./src/Routes/product.route.mjs";
+import cors from "cors";
 
 import dotenv from 'dotenv';
 dotenv.config();
@@ -11,6 +12,7 @@ connectToDB();
 const PORT = process.env.PORT || 3000;
 const app = express();
 
+app.use(cors());
 app.use(express.json()); // for parsing application/json
 app.use(express.urlencoded({ extended: true })); // for parsing application/x-www-form-urlencoded
 

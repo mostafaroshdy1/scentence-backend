@@ -1,6 +1,11 @@
 import express from "express";
 import { connectToDB } from "./src/utils/db.mjs";
 import { ExpressError } from "./src/utils/ExpressError.mjs";
+import productRouter from "./src/Routes/product.route.mjs";
+
+import dotenv from 'dotenv';
+dotenv.config();
+
 
 connectToDB();
 const PORT = process.env.PORT || 3000;
@@ -12,6 +17,8 @@ app.use(express.urlencoded({ extended: true })); // for parsing application/x-ww
 // app.use('/users', routeName);
 // app.use('/etc', routeName);
 // app.use('/etc', routeName);
+
+app.use("/products", productRouter);
 
 //  Any Invalid routes
 app.all("*", (req, res, next) => {

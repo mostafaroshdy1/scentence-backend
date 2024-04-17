@@ -5,6 +5,7 @@ import { UserRoutes } from "./src/Routes/User.Routes.mjs";
 import cookieParser from "cookie-parser";
 
 import productRouter from "./src/Routes/product.route.mjs";
+import  orderRoutes  from "./src/Routes/order.route.mjs";
 import cors from "cors";
 
 // import dotenv from 'dotenv';
@@ -49,6 +50,7 @@ app.use(
 app.use(UserRoutes);
 app.use("/products", productRouter);
 app.use("/cart", cartRoutes);
+app.use("/orders",orderRoutes)
 
 
 //  Any Invalid routes

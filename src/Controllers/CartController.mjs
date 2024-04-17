@@ -18,13 +18,26 @@ export { add, get, update, destroy, index };
 
 async function add(req, res) {
   const { email } = req.body; // will be changed once jwt is done
-  const product = {
-    productId: faker.string.uuid(),
-    name: faker.commerce.productName(),
-    price: faker.commerce.price(),
-    qty: Math.floor(Math.random() * 10),
-    img: faker.image.avatar(),
-  };
+  var products=[];
+  let product;
+  for (let i = 0; i < 5; i++) {
+    product = {
+      productId: faker.string.uuid(),
+      name: faker.commerce.productName(),
+      price: faker.commerce.price(),
+      qty: Math.floor(Math.random() * 10),
+      img: faker.image.avatar(),
+    };
+    products.push(product);
+  }
+  // const product = {
+  //   productId: faker.string.uuid(),
+  //   name: faker.commerce.productName(),
+  //   price: faker.commerce.price(),
+  //   qty: Math.floor(Math.random() * 10),
+  //   img: faker.image.avatar(),
+  // };
+
   if (!req.session.carts) {
     req.session.carts = {};
   }

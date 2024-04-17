@@ -30,11 +30,11 @@ const signup_post = async (req, res) => {
     gender,
   });
 
-  const token = createToken(user._id);
+  const token = createToken(user._id, user.email);
   res.cookie("jwt", token, { httpOnly: true, maxAge: 3 * 24 * 60 * 60 * 1000 });
   return res
     .status(200)
-    .json({ msg: "User Registerd Successfully", user_ID: user._id });
+    .json({ msg: "User Registerd Successfully", user_ID: user._id, token: token});
 };
 
 const login_post = async (req, res) => {
@@ -44,12 +44,12 @@ const login_post = async (req, res) => {
   }
   try {
     const user = await UserModel.login(req.body.email, req.body.password);
-    const token = createToken(user._id);
+    const token = createToken(user._id, user.email);
     res.cookie("jwt", token, {
       httpOnly: true,
       maxAge: 3 * 24 * 60 * 60 * 1000,
     });
-    return res.status(200).json({ msg: "Login Success", user_ID: user._id });
+    return res.status(200).json({ msg: "Login Success", user_ID: user._id , token: token});
   } catch (error) {
     return res.status(400).json({ Error: error.message });
   }

@@ -17,11 +17,6 @@ app.use(cookieParser());
 
 app.use(UserRoutes);
 
-app.get("/read-cookies", (req, res) => {
-  const cookie = req.cookies;
-  res.status(200).json({ cookie });
-});
-
 //  Any Invalid routes
 app.all("*", (req, res, next) => {
   next(new ExpressError("Page Not Found", 404));

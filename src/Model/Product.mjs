@@ -26,6 +26,14 @@ const productSchema = new Schema({
     date: {
         type: Date,
         default: Date.now,
+    },
+    quantity: {
+        type: Number,
+        required: true,
+    },
+    stock: {
+        type: Number,
+        required: true,
     }
 });
 

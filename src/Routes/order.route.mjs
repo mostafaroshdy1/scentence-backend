@@ -11,12 +11,21 @@ import {
     viewOrdersOfUser} 
 from '../Controllers/order.controller.mjs';
 
-import {AddOrderValidation} from '../Validation/orders.mjs';
+import {AddOrderValidation,UpdateOrderValidation} from '../Validation/orders.mjs';
 
-router.post('/',AddOrderValidation, createOrder);
+router.post('/',
+AddOrderValidation, 
+createOrder
+);
+
 router.get('/allOrders', getAllOrders);
 router.get('/:id', getOrderById);
-router.put('/:id', updateOrderById);
+
+router.put('/:id', 
+UpdateOrderValidation,
+updateOrderById
+);
+
 router.delete('/:id', deleteOrderById);
 router.put('/cancel/:id', cancelOrder);
 router.get('/', viewOrdersOfUser);

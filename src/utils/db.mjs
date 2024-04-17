@@ -2,6 +2,8 @@ import mongoose from "mongoose";
 
 export { connectToDB };
 
+
+
 const dbName = `ecommerce`;
 
 const dbUrl = process.env.DB_URL || `mongodb://127.0.0.1:27017/${dbName}`;

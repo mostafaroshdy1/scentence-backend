@@ -1,6 +1,8 @@
 import express from "express";
 import { connectToDB } from "./src/utils/db.mjs";
 import { ExpressError } from "./src/utils/ExpressError.mjs";
+import { UserRoutes } from "./src/Routes/User.Routes.mjs";
+import cookieParser from "cookie-parser";
 
 import productRouter from "./src/Routes/product.route.mjs";
 import cors from "cors";
@@ -29,6 +31,8 @@ const redisStore = new RedisStore({
 app.use(cors());
 app.use(express.json()); // for parsing application/json
 app.use(express.urlencoded({ extended: true })); // for parsing application/x-www-form-urlencoded
+
+app.use(cookieParser());
 app.use(
   session({
     store: redisStore,
@@ -42,6 +46,7 @@ app.use(
 // app.use('/etc', routeName);
 
 
+app.use(UserRoutes);
 app.use("/products", productRouter);
 app.use("/cart", cartRoutes);
 

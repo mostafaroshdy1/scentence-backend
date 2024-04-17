@@ -21,7 +21,7 @@ const AddProductValidation = [
 
     for (const file of req.files) {
       if (
-        !["image/png", "image/jpeg", "image/jpg"].includes(file.mimetype)
+        !["image/png", "image/jpeg", "image/jpg",'image/webp'].includes(file.mimetype)
       ) {
         throw new Error("Image must be a PNG, JPG, or JPEG file");
       }

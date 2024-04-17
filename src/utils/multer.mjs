@@ -4,7 +4,7 @@ import dotenv from 'dotenv';
 dotenv.config();
 
 const validationType = {
-    image: ['image/png', 'image/jpg', 'image/jpeg'],
+    image: ['image/png', 'image/jpg', 'image/jpeg','image/webp'],
     files: ['application/pdf']
 }
 

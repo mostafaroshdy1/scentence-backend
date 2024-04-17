@@ -41,7 +41,7 @@ function multerFn(type) {
         limits: {
             fileSize: 10 * 1024 * 1024 
         }
-    }).single('image');
+    }).array('image', 5)
 }
 
 export { multerFn,multerHandelErrors, validationType };

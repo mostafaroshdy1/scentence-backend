@@ -9,29 +9,25 @@ const createProduct = catchAsync(async (req, res) => {
   const { title } = req.body;
   const foundedProduct = await Product.findOne({ title });
   if (foundedProduct) {
-    return res.status(400).json({
-      message: "Product already exists",
-    });
+    return res.status(400).json({ message: "Product already exists" });
   }
 
   if (req.fileUploadError) {
-    return res.json({
-      message: "invalid file, accepted files->(png,jpg,jpeg)",
-    });
+    return res.status(400).json({ message: "invalid file, accepted files->(png,jpg,jpeg)" });
   }
-  const result = await cloudinary.uploader.upload(req.file.path);
 
-  const newProduct = new Product({
-    ...req.body,
-    image: result.secure_url,
-  });
+  const images = [];
+  for (const file of req.files) {
+    const result = await cloudinary.uploader.upload(file.path);
+    images.push(result.secure_url);
+  }
+
+  const newProduct = new Product({ ...req.body, image: images });
 
   const savedProduct = await newProduct.save();
-  return res.status(201).json({
-    message: "Product added successfully",
-    savedProduct,
-  });
+  return res.status(201).json({ message: "Product added successfully", savedProduct });
 });
+
 
 const getAllProducts = catchAsync(async (req, res) => {
   const result = await Product.find();
@@ -40,7 +36,9 @@ const getAllProducts = catchAsync(async (req, res) => {
 
 const getProductById = catchAsync(async (req, res) => {
   const product_id = req.params.id;
-  const foundedProduct = await Product.findById(product_id);
+  console.log(product_id);
+  const foundedProduct = await Product.findOne({_id:product_id});
+  console.log(foundedProduct);
   if (!foundedProduct) {
     return res.status(404).json({ message: "Product Not Found" });
   }
@@ -62,11 +60,15 @@ const updateProductById = catchAsync(async (req, res) => {
   }
 
   let updatedProduct;
-  if (req.file) {
-    const result = await cloudinary.uploader.upload(req.file.path);
+  if (req.files && req.files.length > 0) {
+    const images = [];
+    for (const file of req.files) {
+      const result = await cloudinary.uploader.upload(file.path);
+      images.push(result.secure_url);
+    }
     updatedProduct = await Product.findByIdAndUpdate(
       product_id,
-      { ...req.body, image: result.secure_url },
+      { ...req.body, image: images },
       { new: true }
     );
   } else {
@@ -82,6 +84,7 @@ const updateProductById = catchAsync(async (req, res) => {
     updatedProduct,
   });
 });
+
 
 const deleteProductById = catchAsync(async (req, res) => {
   const product_id = req.params.id;

@@ -12,7 +12,8 @@ const login_get = (req, res) => {
 };
 
 const logout_get = (req, res) => {
-  //res.render("logout");
+  res.cookie("jwt", "", { maxAge: 1 });
+  res.redirect("/home");
 };
 
 const signup_post = async (req, res) => {

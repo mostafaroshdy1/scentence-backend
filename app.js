@@ -1,8 +1,9 @@
 import express from "express";
+import cookieParser from "cookie-parser";
 import { connectToDB } from "./src/utils/db.mjs";
 import { ExpressError } from "./src/utils/ExpressError.mjs";
 import { UserRoutes } from "./src/Routes/User.Routes.mjs";
-import cookieParser from "cookie-parser";
+import { requireAuth } from "./src/Middleware/Auth.Middleware.mjs";
 
 connectToDB();
 const PORT = process.env.PORT || 3000;

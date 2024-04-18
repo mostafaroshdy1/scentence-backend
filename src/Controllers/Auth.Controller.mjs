@@ -1,6 +1,6 @@
 import { UserModel } from "../Model/User.Model.mjs";
 import { validationResult } from "express-validator";
-
+import { sendVerificationEmail } from "../utils/sendmail.mjs";
 import { createToken } from "../utils/auth.mjs";
 
 const signup_get = (req, res) => {
@@ -29,7 +29,10 @@ const signup_post = async (req, res) => {
     password,
     image,
     gender,
+    verified: false,
   });
+
+  sendVerificationEmail({ _id: user._id, email: user.email }, res);
 
   const token = createToken(user._id);
   return res.status(200).json({

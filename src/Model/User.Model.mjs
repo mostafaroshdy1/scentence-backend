@@ -23,6 +23,7 @@ const userSchema = mongoose.Schema({
       message: "Gender must be Male or Female",
     },
   },
+  verified: { type: Boolean },
 });
 //After Saving Event
 userSchema.post("save", (doc, next) => {

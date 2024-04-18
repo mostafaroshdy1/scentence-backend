@@ -34,7 +34,11 @@ const signup_post = async (req, res) => {
   res.cookie("jwt", token, { httpOnly: true, maxAge: 3 * 24 * 60 * 60 * 1000 });
   return res
     .status(200)
-    .json({ msg: "User Registerd Successfully", user_ID: user._id, token: token});
+    .json({
+      msg: "User Registerd Successfully",
+      user_ID: user._id,
+      token: token,
+    });
 };
 
 const login_post = async (req, res) => {
@@ -49,7 +53,9 @@ const login_post = async (req, res) => {
       httpOnly: true,
       maxAge: 3 * 24 * 60 * 60 * 1000,
     });
-    return res.status(200).json({ msg: "Login Success", user_ID: user._id , token: token});
+    return res
+      .status(200)
+      .json({ msg: "Login Success", user_ID: user._id, token: token });
   } catch (error) {
     return res.status(400).json({ Error: error.message });
   }

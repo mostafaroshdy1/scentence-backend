@@ -1,8 +1,12 @@
+import Product from "../Model/Product.mjs";
 import Order from "../Model/Order.mjs";
 import { catchAsync } from "../utils/catchAsync.mjs";
 import { getUserIdFromToken } from "../utils/auth.mjs";
 import { getEmailFromToken } from "../utils/auth.mjs";
 import mongoose from "mongoose";
+import Stripe from "stripe";
+import { ExpressError } from "../utils/ExpressError.mjs";
+const stripe = Stripe(process.env.STRIPE);
 
 const createOrder = catchAsync(async (req, res) => {
   const token = req.cookies.jwt;
@@ -22,16 +26,62 @@ const createOrder = catchAsync(async (req, res) => {
     };
 
     products.set(productId, productData);
+
     total += productPrice * productQty;
   });
+
+  const session = await mongoose.startSession();
+  session.startTransaction();
+
+  try {
+    const productsFromDb = await Product.find({
+      _id: { $in: Array.from(products.keys()) },
+    }).session(session);
+
+    for (const product of productsFromDb) {
+      const cartProduct = products.get(product.id);
+      product.stock -= cartProduct.quantity;
+
+      await product.save();
+    }
+
+    await session.commitTransaction();
+    session.endSession();
+  } catch (error) {
+    await session.abortTransaction();
+    session.endSession();
+    throw new ExpressError("Product stock is not enough", 409);
+  }
+
   const order = new Order({
     ...req.body,
     user: getUserIdFromToken(token),
     products: products,
     total: total,
   });
+  const lineItems = cart.map((product) => ({
+    price_data: {
+      currency: "usd",
+      product_data: {
+        name: product.name,
+        images: [product.img],
+      },
+      unit_amount: product.price * 100,
+    },
+    quantity: product.qty,
+  }));
+
+  const stripeSession = await stripe.checkout.sessions.create({
+    payment_method_types: ["card"],
+    line_items: lineItems,
+    mode: "payment",
+    success_url: "https://url.com", // will be changed later
+    cancel_url: "https://url.com", // will be changed later
+  });
+  order.paymentId = stripeSession.id;
+
   const savedOrder = await order.save();
-  res.status(201).json(savedOrder);
+  return res.status(201).json(savedOrder);
 });
 
 const getAllOrders = catchAsync(async (req, res) => {

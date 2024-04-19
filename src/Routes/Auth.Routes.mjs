@@ -14,6 +14,4 @@ AuthRoutes.post("/signup", validateSignup, Auth_Con.signup_post);
 
 AuthRoutes.post("/login", validateLogin, Auth_Con.login_post);
 
-AuthRoutes.get("/logout", Auth_Con.logout_get);
-
 export { AuthRoutes };

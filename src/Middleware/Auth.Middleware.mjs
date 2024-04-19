@@ -1,6 +1,7 @@
 import jwt from "jsonwebtoken";
 import { UserModel } from "../Model/User.Model.mjs";
 
+//Authorization Middelware
 const requireAuth = (req, res, next) => {
   const authHeader = req.headers["authorization"];
   if (!authHeader) {
@@ -10,9 +11,9 @@ const requireAuth = (req, res, next) => {
   const token = authHeader.split(" ")[1];
   if (token) {
     jwt.verify(token, "iti os 44", (err, decodedToken) => {
-      if (err) {
+      if (err && decodedToken.verified == false) {
         console.log(err.message);
-        return res.redirect("/login");
+        return res.status(403).json({ Status: 403, msg: "Not Authorized" });
       } else {
         console.log("Auth", decodedToken);
         next();
@@ -22,6 +23,8 @@ const requireAuth = (req, res, next) => {
     return res.redirect("/login");
   }
 };
+
+//Check if the user logged in or not to display the data
 
 const checkUser = (req, res, next) => {
   const authHeader = req.headers["authorization"];

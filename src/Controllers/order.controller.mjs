@@ -9,8 +9,7 @@ import { ExpressError } from "../utils/ExpressError.mjs";
 const stripe = Stripe(process.env.STRIPE);
 
 const createOrder = catchAsync(async (req, res) => {
-  const token = req.cookies.jwt;
-  const cart = req.session.carts[getEmailFromToken(token)];
+  const cart = req.session.carts[req.decodedUser.email];
   if (!cart) {
     throw new ExpressError("No items in the cart", 400);
   }
@@ -56,8 +55,15 @@ const createOrder = catchAsync(async (req, res) => {
   }
 
   const order = new Order({
-    ...req.body,
-    user: getUserIdFromToken(token),
+    apartment: req.body.apartment,
+    floor: req.body.floor,
+    building: req.body.building,
+    street: req.body.street,
+    Area: req.body.Area,
+    city: req.body.city,
+    secondPhone: req.body.secondPhone,
+    paymentMethod: req.body.paymentMethod,
+    user: req.decodedUser.id,
     products: products,
     total: total,
   });
@@ -127,8 +133,7 @@ const cancelOrder = catchAsync(async (req, res) => {
 });
 
 const viewOrdersOfUser = catchAsync(async (req, res) => {
-  const token = req.cookies.jwt;
-  const userId = new mongoose.Types.ObjectId(getUserIdFromToken(token));
+  const userId = req.decodedUser.id;
 
   const orders = await Order.find({ user: userId });
   res.status(200).json(orders);

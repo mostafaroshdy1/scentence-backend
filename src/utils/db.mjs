@@ -4,7 +4,7 @@ export { connectToDB };
 
 
 
-const dbName = `ecommerce`;
+const dbName = `perfume`;
 
 const dbUrl = process.env.DB_URL || `mongodb://127.0.0.1:27017/${dbName}`;
 async function connectToDB() {

@@ -1,6 +1,7 @@
 import { faker } from "@faker-js/faker";
 import { ExpressError } from "../utils/ExpressError.mjs";
-
+import { getEmailFromToken } from "../utils/auth.mjs";
+import Product from "../Model/Product.mjs";
 export { add, get, update, destroy, index };
 
 // cart structure:
@@ -17,22 +18,29 @@ export { add, get, update, destroy, index };
 // };
 
 async function add(req, res) {
-  const { email } = req.body; // will be changed once jwt is done
-  const product = {
-    productId: faker.string.uuid(),
-    name: faker.commerce.productName(),
-    price: faker.commerce.price(),
-    qty: Math.floor(Math.random() * 10),
-    img: faker.image.avatar(),
+  const token = req.cookies.jwt;
+  const email = getEmailFromToken(token);
+  const { productId, qty } = req.body;
+  const product = await Product.findById(productId);
+  if (!product) {
+    throw new ExpressError("Invalid Product ID", 404);
+  }
+  const productToCart = {
+    productId: product._id,
+    name: product.title,
+    price: product.price,
+    qty: qty,
+    img: product.image,
   };
+
   if (!req.session.carts) {
     req.session.carts = {};
   }
 
   if (!req.session.carts[email]) {
-    req.session.carts[email] = [product];
+    req.session.carts[email] = [productToCart];
   } else {
-    req.session.carts[email].push(product);
+    req.session.carts[email].push(productToCart);
   }
   return res.json("Prodect added successfully");
 }

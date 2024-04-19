@@ -23,19 +23,20 @@ const userSchema = mongoose.Schema({
       message: "Gender must be Male or Female",
     },
   },
+  verified: { type: Boolean },
 });
-
+//After Saving Event
 userSchema.post("save", (doc, next) => {
   console.log("User Created Successfully", doc);
   next();
 });
-
+// To Hash Passwords
 userSchema.pre("save", async function (next) {
   const salt = await bcrypt.genSalt(10);
   this.password = await bcrypt.hash(this.password, salt);
   next();
 });
-
+// Login Static Function
 userSchema.statics.login = async function (email, password) {
   const user = await this.findOne({ email: email });
   if (user) {

@@ -11,7 +11,9 @@ const stripe = Stripe(process.env.STRIPE);
 const createOrder = catchAsync(async (req, res) => {
   const token = req.cookies.jwt;
   const cart = req.session.carts[getEmailFromToken(token)];
-
+  if (!cart) {
+    throw new ExpressError("No items in the cart", 400);
+  }
   let products = new Map();
   let total = 0;
 

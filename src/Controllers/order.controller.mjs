@@ -20,7 +20,6 @@ const createOrder = catchAsync(async (req, res) => {
     const productId = element.productId;
     const productQty = element.qty;
     const productPrice = element.price;
-
     const productData = {
       product: productId,
       quantity: productQty,
@@ -53,8 +52,9 @@ const createOrder = catchAsync(async (req, res) => {
     session.endSession();
     throw new ExpressError("Product stock is not enough", 409);
   }
-
+  const maxOrder = await Order.find().sort({ orderId: -1 }).limit(1);
   const order = new Order({
+    orderId: maxOrder.length === 0 ? 1 : maxOrder[0].orderId + 1,
     apartment: req.body.apartment,
     floor: req.body.floor,
     building: req.body.building,
@@ -97,11 +97,16 @@ const getAllOrders = catchAsync(async (req, res) => {
   res.status(200).json(orders);
 });
 const getOrderById = catchAsync(async (req, res) => {
-  const order = await Order.findById(req.params.id);
+  const orderId = new mongoose.Types.ObjectId(req.params.id);
+  const order = await Order.findById(orderId);
+  const products = await Product.find({
+    _id: { $in: Array.from(order.products.keys()) },
+  });
+
   if (!order) {
     return res.status(404).json({ message: "Order Not Found" });
   }
-  res.status(200).json(order);
+  res.status(200).json({ message: "Order Found", order, products });
 });
 const updateOrderById = catchAsync(async (req, res) => {
   const order = await Order.findByIdAndUpdate(req.params.id, req.body, {

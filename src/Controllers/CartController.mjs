@@ -18,8 +18,7 @@ export { add, get, update, destroy, index };
 // };
 
 async function add(req, res) {
-  const token = req.cookies.jwt;
-  const email = getEmailFromToken(token);
+  const email = req.decodedUser.email;
   const { productId, qty } = req.body;
   const product = await Product.findById(productId);
   if (!product) {

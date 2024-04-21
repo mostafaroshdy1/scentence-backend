@@ -29,7 +29,7 @@ const signup_post = async (req, res) => {
 
   sendVerificationEmail({ _id: user._id, email: user.email }, res);
 
-  const token = createToken(user._id);
+  const token = createToken(user._id, email, username);
   return res.status(200).json({
     token: token,
     msg: `${username} Registerd Successfully , A Verification Email Sent to your inbox `,

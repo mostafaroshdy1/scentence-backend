@@ -18,7 +18,9 @@ export { add, get, update, destroy, index };
 // };
 
 async function add(req, res) {
-  const email = req.decodedUser.email;
+  console.log(req.decodedUser);
+  const { email } = req.decodedUser;
+  console.log(email);
   const { productId, qty } = req.body;
   const product = await Product.findById(productId);
   if (!product) {
@@ -45,7 +47,7 @@ async function add(req, res) {
 }
 
 async function get(req, res) {
-  const { email } = req.body;
+  const { email } = req.decodedUser;
   return res.send(req.session.carts[email]);
 }
 
@@ -57,7 +59,7 @@ async function update(req, res) {
 }
 
 async function destroy(req, res) {
-  const { email } = req.body;
+  const { email } = req.decodedUser;
   delete req.session.carts[email];
   return res.send("Cart deleted successfully");
 }

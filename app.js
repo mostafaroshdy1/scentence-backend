@@ -7,7 +7,7 @@ import { UserRoutes } from "./src/Routes/User.Routes.mjs";
 import { requireAuth, checkUser } from "./src/Middleware/Auth.Middleware.mjs";
 
 import productRouter from "./src/Routes/product.route.mjs";
-import  orderRoutes  from "./src/Routes/order.route.mjs";
+import orderRoutes from "./src/Routes/order.route.mjs";
 import cors from "cors";
 
 import dotenv from "dotenv";
@@ -49,7 +49,7 @@ app.use(checkUser);
 app.use("/User", UserRoutes);
 app.use("/products", productRouter);
 app.use("/cart", cartRoutes);
-app.use("/orders",orderRoutes)
+app.use("/orders", orderRoutes);
 
 //  Any Invalid routes
 app.all("*", (req, res, next) => {

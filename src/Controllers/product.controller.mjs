@@ -36,46 +36,37 @@ const getAllProducts = catchAsync(async (req, res) => {
   const page = parseInt(req.query.page) || 1;
   const limit = parseInt(req.query.limit) || 9;
   const sortBy = parseInt(req.query.sortBy) || 0;
+  const searchQuery = req.query.search || "";
   const category = req.params.category || "";
 
-  const filters = {};
+  let filters = {};
+  let searchFilter = {};
 
   if (category) {
     filters["category"] = category;
   }
-  const count = await Product.countDocuments(filters);
-  const totalPages = Math.ceil(count / limit);
-  const skip = (page - 1) * limit;
 
-  let aggregationPipeline = [];
-
-  if (sortBy === 0) {
-    aggregationPipeline.push({ $sort: { title: 1 } });
-  } else if (sortBy === 1) {
-    aggregationPipeline.push({ $sort: { title: -1 } });
-  } else if (sortBy === 2) {
-    aggregationPipeline.push({ $sort: { price: 1 } });
-  } else if (sortBy === 3) {
-    aggregationPipeline.push({ $sort: { price: -1 } });
-  } else if (sortBy === 5) {
-    aggregationPipeline.push({ $sort: { date: 1 } });
-  } else {
-    aggregationPipeline.push({ $sort: { date: -1 } });
+  if (searchQuery) {
+    searchFilter = { title: { $regex: searchQuery, $options: "i" } };
   }
 
-  aggregationPipeline.push(
-    { $match: filters },
-    { $skip: skip },
-    { $limit: limit }
-  );
+  const countPromise = Product.countDocuments({ ...filters, ...searchFilter });
+  const skip = (page - 1) * limit;
 
-  const result = await Product.aggregate(aggregationPipeline);
+  let findPromise = Product.find({ ...filters, ...searchFilter })
+    .sort(sortBy === 1 ? { title: -1 } : { title: 1 })
+    .skip(skip)
+    .limit(limit)
+    .exec();
+
+  const [count, products] = await Promise.all([countPromise, findPromise]);
+  const totalPages = Math.ceil(count / limit);
 
   return res.status(200).json({
     currentPage: page,
     totalPages,
     totalProducts: count,
-    products: result,
+    products,
   });
 });
 
@@ -137,35 +128,18 @@ const deleteProductById = catchAsync(async (req, res) => {
   return res.status(200).json({ message: "Product deleted successfully" });
 });
 
-const searchProduct = catchAsync(async (req, res) => {
-  const { search } = req.query;
-  const result = await Product.find({
-    title: { $regex: search, $options: "i" },
+const getCategoryProductCount = catchAsync(async (req, res) => {
+  const categories = ["men", "women", "kids"];
+
+  const countPromises = categories.map(async (category) => {
+    const count = await Product.countDocuments({ category });
+    return { category, count };
   });
-  if (result.length === 0) {
-    return res.status(404).json({ message: "Product Not Found" });
-  }
-  return res.status(200).json(result);
+
+  const categoryCounts = await Promise.all(countPromises);
+
+  return res.status(200).json({ categoryCounts });
 });
-
-// const categoryFilter = catchAsync(async (req, res) => {
-//   const category = req.params.category;
-//   const page = parseInt(req.query.page) || 1;
-//   const limit = parseInt(req.query.limit) || 9;
-//   const skip = (page - 1) * limit;
-
-//   const count = await Product.countDocuments({ category });
-//   const totalPages = Math.ceil(count / limit);
-
-//   const result = await Product.find({ category }).skip(skip).limit(limit);
-
-//   return res.status(200).json({
-//     currentPage: page,
-//     totalPages,
-//     totalProducts: count,
-//     products: result,
-//   });
-// });
 
 export {
   createProduct,
@@ -173,6 +147,5 @@ export {
   getProductById,
   updateProductById,
   deleteProductById,
-  searchProduct,
-  // categoryFilter,
+  getCategoryProductCount,
 };

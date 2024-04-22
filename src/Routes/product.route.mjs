@@ -11,7 +11,7 @@ import {
   getProductById,
   updateProductById,
   deleteProductById,
-  searchProduct,
+  getCategoryProductCount,
 } from "../Controllers/product.controller.mjs";
 import { AddProductValidation } from "../Validation/products.mjs";
 
@@ -27,7 +27,7 @@ router.post(
 
 router.get("/", getAllProducts);
 
-router.get("/search", searchProduct);
+router.get("/categoryCount", getCategoryProductCount);
 
 router.get("/:id", getProductById);
 

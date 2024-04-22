@@ -49,6 +49,6 @@ userSchema.statics.login = async function (email, password) {
   throw new ExpressError("User is not registered", 400);
 };
 
-const UserModel = mongoose.model("user", userSchema);
+const UserModel = mongoose.model("User", userSchema);
 
 export { UserModel };

@@ -1,15 +1,14 @@
 import Product from "../Model/Product.mjs";
 import Order from "../Model/Order.mjs";
 import { catchAsync } from "../utils/catchAsync.mjs";
-import { getUserIdFromToken } from "../utils/auth.mjs";
-import { getEmailFromToken } from "../utils/auth.mjs";
 import mongoose from "mongoose";
 import Stripe from "stripe";
 import { ExpressError } from "../utils/ExpressError.mjs";
+import { getFromRedis } from "./CartController.mjs";
 const stripe = Stripe(process.env.STRIPE);
 
 const createOrder = catchAsync(async (req, res) => {
-  const cart = req.session.carts[req.decodedUser.email];
+  const cart = await getFromRedis(req.decodedUser.email);
   if (!cart) {
     throw new ExpressError("No items in the cart", 400);
   }

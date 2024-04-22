@@ -18,9 +18,7 @@ export { add, get, update, destroy, index };
 // };
 
 async function add(req, res) {
-  console.log(req.decodedUser);
   const { email } = req.decodedUser;
-  console.log(email);
   const { productId, qty } = req.body;
   const product = await Product.findById(productId);
   if (!product) {
@@ -33,22 +31,27 @@ async function add(req, res) {
     qty: qty,
     img: product.image,
   };
-
   if (!req.session.carts) {
     req.session.carts = {};
   }
-
   if (!req.session.carts[email]) {
     req.session.carts[email] = [productToCart];
+    req.session.save();
   } else {
     req.session.carts[email].push(productToCart);
+    req.session.save();
   }
-  return res.json("Prodect added successfully");
+  if (!req.body.reorder) {
+    return res.json("Prodect added successfully");
+  }
 }
 
 async function get(req, res) {
   const { email } = req.decodedUser;
-  return res.send(req.session.carts[email]);
+  if (!req.session.carts[email]) {
+    return res.status(200).send("Cart is Empty");
+  }
+  return res.status(200).json(req.session.carts[email]);
 }
 
 async function update(req, res) {
@@ -58,10 +61,16 @@ async function update(req, res) {
   return res.send("Cart Updated Successfully");
 }
 
-async function destroy(req, res) {
+async function destroy(req, res, savedOrder) {
   const { email } = req.decodedUser;
   delete req.session.carts[email];
-  return res.send("Cart deleted successfully");
+  if (savedOrder) {
+    return res.send({
+      message: "Cart deleted Successfully",
+      order: savedOrder,
+    });
+  }
+  return res.send("Cart deleted Successfully");
 }
 
 async function index(req, res) {

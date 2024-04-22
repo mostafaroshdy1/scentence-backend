@@ -11,7 +11,8 @@ try {
 
 async function add(req, res) {
   const { email } = req.decodedUser;
-  const { productId, qty } = req.body;
+  const { productId } = req.body;
+  const qty = parseInt(req.body.qty);
   const product = await Product.findById(productId);
   if (!product) {
     throw new ExpressError("Invalid Product ID", 404);
@@ -20,7 +21,7 @@ async function add(req, res) {
     productId: product._id,
     name: product.title,
     price: product.price,
-    qty: parseInt(qty),
+    qty: qty,
     img: product.image,
   };
 
@@ -32,7 +33,7 @@ async function add(req, res) {
     } else {
       const item = cart.find((el) => el.productId == productToCart.productId);
       if (item) {
-        item.qty++;
+        item.qty += qty;
       } else {
         cart.push(productToCart);
       }

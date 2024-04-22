@@ -20,17 +20,26 @@ async function add(req, res) {
     productId: product._id,
     name: product.title,
     price: product.price,
-    qty: qty,
+    qty: parseInt(qty),
     img: product.image,
   };
 
   let cart = await getFromRedis(email);
-  if (!cart) {
-    await storeToRedis(email, [productToCart]);
-    cart = [productToCart];
-  } else {
-    cart.push(productToCart);
-    await storeToRedis(email, cart);
+  try {
+    if (!cart) {
+      await storeToRedis(email, [productToCart]);
+      cart = [productToCart];
+    } else {
+      const item = cart.find((el) => el.productId == productToCart.productId);
+      if (item) {
+        item.qty++;
+      } else {
+        cart.push(productToCart);
+      }
+      await storeToRedis(email, cart);
+    }
+  } catch (error) {
+    throw new ExpressError("Redis adding error", 500);
   }
 
   return res.send(cart);

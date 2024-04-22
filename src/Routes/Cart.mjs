@@ -10,8 +10,8 @@ const router = express.Router();
 router
   .route("/")
   .post(catchAsync(cart.add))
-  .get(cart.get)
+  .get(catchAsync(cart.get))
   .put(catchAsync(cart.update))
-  .delete(cart.destroy);
+  .delete(catchAsync(cart.destroy));
 
 // router.route("/all").get(cart.index); // incase the admin needs to view all carts (requires validation)

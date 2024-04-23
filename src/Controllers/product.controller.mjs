@@ -1,21 +1,21 @@
-import Product from '../Model/Product.mjs';
-import { catchAsync } from '../utils/catchAsync.mjs';
-import { multerFn, validationType } from '../utils/multer.mjs';
-import cloudinary from 'cloudinary';
+import Product from "../Model/Product.mjs";
+import { catchAsync } from "../utils/catchAsync.mjs";
+import { multerFn, validationType } from "../utils/multer.mjs";
+import cloudinary from "cloudinary";
 
-const upload = multerFn('images', validationType.image);
+const upload = multerFn("images", validationType.image);
 
 const createProduct = catchAsync(async (req, res) => {
   const { title } = req.body;
   const foundedProduct = await Product.findOne({ title });
   if (foundedProduct) {
-    return res.status(400).json({ message: 'Product already exists' });
+    return res.status(400).json({ message: "Product already exists" });
   }
 
   if (req.fileUploadError) {
     return res
       .status(400)
-      .json({ message: 'invalid file, accepted files->(png,jpg,jpeg)' });
+      .json({ message: "invalid file, accepted files->(png,jpg,jpeg)" });
   }
 
   const images = [];
@@ -29,32 +29,53 @@ const createProduct = catchAsync(async (req, res) => {
   const savedProduct = await newProduct.save();
   return res
     .status(201)
-    .json({ message: 'Product added successfully', savedProduct });
+    .json({ message: "Product added successfully", savedProduct });
 });
 
 const getAllProducts = catchAsync(async (req, res) => {
   const page = parseInt(req.query.page) || 1;
   const limit = parseInt(req.query.limit) || 9;
   const sortBy = parseInt(req.query.sortBy) || 0;
-  const searchQuery = req.query.search || '';
-  const category = req.params.category || '';
+  const searchQuery = req.query.search || "";
+  const category = req.params.category || "";
 
   let filters = {};
   let searchFilter = {};
 
   if (category) {
-    filters['category'] = category;
+    filters["category"] = category;
   }
 
   if (searchQuery) {
-    searchFilter = { title: { $regex: searchQuery, $options: 'i' } };
+    searchFilter = { title: { $regex: searchQuery, $options: "i" } };
   }
 
   const countPromise = Product.countDocuments({ ...filters, ...searchFilter });
   const skip = (page - 1) * limit;
 
+  let sortCriteria = {};
+  switch (sortBy) {
+    case 1:
+      sortCriteria = { title: -1 };
+      break;
+    case 2:
+      sortCriteria = { price: 1 };
+      break;
+    case 3:
+      sortCriteria = { price: -1 };
+      break;
+    case 4:
+      sortCriteria = { date: -1 };
+      break;
+    case 5:
+      sortCriteria = { date: 1 };
+      break;
+    default:
+      sortCriteria = { title: 1 };
+  }
+
   let findPromise = Product.find({ ...filters, ...searchFilter })
-    .sort(sortBy === 1 ? { title: -1 } : { title: 1 })
+    .sort(sortCriteria)
     .skip(skip)
     .limit(limit)
     .exec();
@@ -74,7 +95,7 @@ const getProductById = catchAsync(async (req, res) => {
   const product_id = req.params.id;
   const foundedProduct = await Product.findOne({ _id: product_id });
   if (!foundedProduct) {
-    return res.status(404).json({ message: 'Product Not Found' });
+    return res.status(404).json({ message: "Product Not Found" });
   }
   return res.status(200).json(foundedProduct);
 });
@@ -84,12 +105,12 @@ const updateProductById = catchAsync(async (req, res) => {
 
   const foundedProduct = await Product.findById(product_id);
   if (!foundedProduct) {
-    return res.status(404).json({ message: 'Product Not Found' });
+    return res.status(404).json({ message: "Product Not Found" });
   }
 
   if (req.fileUploadError) {
     return res.json({
-      message: 'invalid file, accepted files->(png,jpg,jpeg)',
+      message: "invalid file, accepted files->(png,jpg,jpeg)",
     });
   }
 
@@ -114,7 +135,7 @@ const updateProductById = catchAsync(async (req, res) => {
   }
 
   return res.status(200).json({
-    message: 'Product updated successfully',
+    message: "Product updated successfully",
     updatedProduct,
   });
 });
@@ -123,13 +144,13 @@ const deleteProductById = catchAsync(async (req, res) => {
   const product_id = req.params.id;
   const deletedProduct = await Product.findByIdAndDelete(product_id);
   if (!deletedProduct) {
-    return res.status(404).json({ message: 'Product Not Found' });
+    return res.status(404).json({ message: "Product Not Found" });
   }
-  return res.status(200).json({ message: 'Product deleted successfully' });
+  return res.status(200).json({ message: "Product deleted successfully" });
 });
 
 const getCategoryProductCount = catchAsync(async (req, res) => {
-  const categories = ['men', 'women', 'kids'];
+  const categories = ["men", "women", "kids"];
 
   const countPromises = categories.map(async (category) => {
     const count = await Product.countDocuments({ category });

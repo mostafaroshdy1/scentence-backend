@@ -19,12 +19,16 @@ const productSchema = new Schema({
     type: String,
     required: true,
   },
-  image: [{ type: String, required: true }],
+  image: {
+    type: String,
+    required: true,
+  },
 
   date: {
     type: Date,
     default: Date.now,
   },
+
   stock: {
     type: Number,
     required: true,

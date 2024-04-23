@@ -1,20 +1,23 @@
 import express from "express";
 import { connectToDB } from "./src/utils/db.mjs";
 import { ExpressError } from "./src/utils/ExpressError.mjs";
+import { AuthRoutes } from "./src/Routes/Auth.Routes.mjs";
+import { UserRoutes } from "./src/Routes/User.Routes.mjs";
+
+import { requireAuth, checkUser } from "./src/Middleware/Auth.Middleware.mjs";
 
 import productRouter from "./src/Routes/product.route.mjs";
+import  orderRoutes  from "./src/Routes/order.route.mjs";
 import cors from "cors";
 
-// import dotenv from 'dotenv';
-// dotenv.config();
-
+import dotenv from "dotenv";
+dotenv.config();
 
 import { router as cartRoutes } from "./src/Routes/Cart.mjs";
 
 import RedisStore from "connect-redis";
 import session from "express-session";
 import { createClient } from "redis";
-
 
 connectToDB();
 const PORT = process.env.PORT || 3000;
@@ -40,11 +43,12 @@ app.use(
 // app.use('/users', routeName);
 // app.use('/etc', routeName);
 // app.use('/etc', routeName);
-
-
+app.use(checkUser);
+app.use(AuthRoutes);
+app.use("/User", UserRoutes);
 app.use("/products", productRouter);
 app.use("/cart", cartRoutes);
-
+app.use("/orders",orderRoutes)
 
 //  Any Invalid routes
 app.all("*", (req, res, next) => {

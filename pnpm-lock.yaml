@@ -23,6 +23,9 @@ dependencies:
   cors:
     specifier: ^2.8.5
     version: 2.8.5
+  crypto:
+    specifier: ^1.0.1
+    version: 1.0.1
   dotenv:
     specifier: ^16.4.5
     version: 16.4.5
@@ -39,11 +42,14 @@ dependencies:
     specifier: ^9.0.2
     version: 9.0.2
   mongoose:
-    specifier: ^8.3.0
+    specifier: ^8.3.2
     version: 8.3.2
   multer:
-    specifier: ^1.4.5-lts.1
+    specifier: 1.4.5-lts.1
     version: 1.4.5-lts.1
+  nodemailer:
+    specifier: ^6.9.13
+    version: 6.9.13
   nodemon:
     specifier: ^3.1.0
     version: 3.1.0
@@ -53,6 +59,9 @@ dependencies:
   stripe:
     specifier: ^15.3.0
     version: 15.3.0
+  uuid:
+    specifier: ^9.0.1
+    version: 9.0.1
 
 packages:
 
@@ -408,6 +417,11 @@ packages:
     dependencies:
       object-assign: 4.1.1
       vary: 1.1.2
+    dev: false
+
+  /crypto@1.0.1:
+    resolution: {integrity: sha512-VxBKmeNcqQdiUQUW2Tzq0t377b54N2bMtXO/qiLa+6eRRmmC4qT3D4OnTGoT/U6O9aklQ/jTwbOtRMTTY8G0Ig==}
+    deprecated: This package is no longer supported. It's now a built-in Node module. If you've depended on crypto, you should switch to the one that's built-in.
     dev: false
 
   /debug@2.6.9:
@@ -1075,6 +1089,11 @@ packages:
       whatwg-url: 5.0.0
     dev: false
 
+  /nodemailer@6.9.13:
+    resolution: {integrity: sha512-7o38Yogx6krdoBf3jCAqnIN4oSQFx+fMa0I7dK1D+me9kBxx12D+/33wSb+fhOCtIxvYJ+4x4IMEhmhCKfAiOA==}
+    engines: {node: '>=6.0.0'}
+    dev: false
+
   /nodemon@3.1.0:
     resolution: {integrity: sha512-xqlktYlDMCepBJd43ZQhjWwMw2obW/JRvkrLxq5RCNcuDDX1DbcPT+qT1IlIIdf+DhnWs90JpTMe+Y5KxOchvA==}
     engines: {node: '>=10'}
@@ -1195,6 +1214,13 @@ packages:
 
   /qs@6.11.0:
     resolution: {integrity: sha512-MvjoMCJwEarSbUYk5O+nmoSzSutSsTwF85zcHPQ9OrlFoZOYIjaqBAJIqIXjptyD5vThxGq52Xu/MaJzRkIk4Q==}
+    engines: {node: '>=0.6'}
+    dependencies:
+      side-channel: 1.0.6
+    dev: false
+
+  /qs@6.12.1:
+    resolution: {integrity: sha512-zWmv4RSuB9r2mYQw3zxQuHWeU+42aKi1wWig/j4ele4ygELZ7PEO6MM7rim9oAQH2A5MWfsAVf/jPvTPgCbvUQ==}
     engines: {node: '>=0.6'}
     dependencies:
       side-channel: 1.0.6
@@ -1418,7 +1444,7 @@ packages:
     engines: {node: '>=12.*'}
     dependencies:
       '@types/node': 20.12.7
-      qs: 6.11.0
+      qs: 6.12.1
     dev: false
 
   /supports-color@5.5.0:
@@ -1509,6 +1535,11 @@ packages:
   /utils-merge@1.0.1:
     resolution: {integrity: sha512-pMZTvIkT1d+TFGvDOqodOclx0QWkkgi6Tdoa8gC8ffGAAqz9pzPTZWAybbsHHoED/ztMtkv/VoYTYyShUn81hA==}
     engines: {node: '>= 0.4.0'}
+    dev: false
+
+  /uuid@9.0.1:
+    resolution: {integrity: sha512-b+1eJOlsR9K8HJpow9Ok3fiWOWSIcIzXodvv0rQjVoOVNpWMpxf1wZNpt4y9h10odCNrqnYp1OBzRktckBe3sA==}
+    hasBin: true
     dev: false
 
   /validator@13.11.0:

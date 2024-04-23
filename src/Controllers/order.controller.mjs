@@ -1,16 +1,14 @@
 import Product from "../Model/Product.mjs";
 import Order from "../Model/Order.mjs";
 import { catchAsync } from "../utils/catchAsync.mjs";
-import { getUserIdFromToken } from "../utils/auth.mjs";
-import { getEmailFromToken } from "../utils/auth.mjs";
 import mongoose from "mongoose";
 import Stripe from "stripe";
 import { ExpressError } from "../utils/ExpressError.mjs";
+import { getFromRedis } from "./CartController.mjs";
 const stripe = Stripe(process.env.STRIPE);
 
 const createOrder = catchAsync(async (req, res) => {
-  const token = req.cookies.jwt;
-  const cart = req.session.carts[getEmailFromToken(token)];
+  const cart = await getFromRedis(req.decodedUser.email);
   if (!cart) {
     throw new ExpressError("No items in the cart", 400);
   }
@@ -21,7 +19,6 @@ const createOrder = catchAsync(async (req, res) => {
     const productId = element.productId;
     const productQty = element.qty;
     const productPrice = element.price;
-
     const productData = {
       product: productId,
       quantity: productQty,
@@ -54,10 +51,18 @@ const createOrder = catchAsync(async (req, res) => {
     session.endSession();
     throw new ExpressError("Product stock is not enough", 409);
   }
-
+  const maxOrder = await Order.find().sort({ orderId: -1 }).limit(1);
   const order = new Order({
-    ...req.body,
-    user: getUserIdFromToken(token),
+    orderId: maxOrder.length === 0 ? 1 : maxOrder[0].orderId + 1,
+    apartment: req.body.apartment,
+    floor: req.body.floor,
+    building: req.body.building,
+    street: req.body.street,
+    Area: req.body.Area,
+    city: req.body.city,
+    secondPhone: req.body.secondPhone,
+    paymentMethod: req.body.paymentMethod,
+    user: req.decodedUser.id,
     products: products,
     total: total,
   });
@@ -91,11 +96,16 @@ const getAllOrders = catchAsync(async (req, res) => {
   res.status(200).json(orders);
 });
 const getOrderById = catchAsync(async (req, res) => {
-  const order = await Order.findById(req.params.id);
+  const orderId = new mongoose.Types.ObjectId(req.params.id);
+  const order = await Order.findById(orderId);
+  const products = await Product.find({
+    _id: { $in: Array.from(order.products.keys()) },
+  });
+
   if (!order) {
     return res.status(404).json({ message: "Order Not Found" });
   }
-  res.status(200).json(order);
+  res.status(200).json({ message: "Order Found", order, products });
 });
 const updateOrderById = catchAsync(async (req, res) => {
   const order = await Order.findByIdAndUpdate(req.params.id, req.body, {
@@ -127,8 +137,7 @@ const cancelOrder = catchAsync(async (req, res) => {
 });
 
 const viewOrdersOfUser = catchAsync(async (req, res) => {
-  const token = req.cookies.jwt;
-  const userId = new mongoose.Types.ObjectId(getUserIdFromToken(token));
+  const userId = req.decodedUser.id;
 
   const orders = await Order.find({ user: userId });
   res.status(200).json(orders);

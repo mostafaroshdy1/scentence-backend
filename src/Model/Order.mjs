@@ -1,10 +1,14 @@
-import { de } from "@faker-js/faker";
 import mongoose from "mongoose";
 
 const { Schema, model } = mongoose;
 
 const orderSchema = new Schema(
   {
+    orderId: {
+      type: Number,
+      required: true,
+      unique: true,
+    },
     user: {
       type: Schema.Types.ObjectId,
       ref: "User",

@@ -16,11 +16,12 @@ async function add(req, res) {
   const { email } = req.decodedUser;
   const { productId } = req.body;
   const qty = parseInt(req.body.qty);
-  const stock = (await Product.findById(productId)).stock;
+  if (!productId || !qty) throw new ExpressError("Invalid request", 400);
   const product = await Product.findById(productId);
   if (!product) {
     throw new ExpressError("Invalid Product ID", 404);
   }
+  const stock = product.stock;
   const productToCart = {
     productId: product._id,
     name: product.title,

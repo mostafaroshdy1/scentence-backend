@@ -1,21 +1,13 @@
-import { faker } from "@faker-js/faker";
 import { ExpressError } from "../utils/ExpressError.mjs";
-import { getEmailFromToken } from "../utils/auth.mjs";
 import Product from "../Model/Product.mjs";
-export { add, get, update, destroy, index };
-
-// cart structure:
-// const carts = {
-//   email: [
-//     {
-//       productId: 5,
-//       name: "Iphone",
-//       price: 210000,
-//       qty: 2,
-//       img: "url",
-//     },
-//   ],
-// };
+export { add, get, update, destroy, getFromRedis };
+import redis from "redis";
+const client = redis.createClient();
+try {
+  await client.connect();
+} catch (error) {
+  throw new ExpressError(error, 500);
+}
 
 async function add(req, res) {
   const { email } = req.decodedUser;
@@ -31,6 +23,7 @@ async function add(req, res) {
     qty: qty,
     img: product.image,
   };
+
   if (!req.session.carts) {
     req.session.carts = {};
   }
@@ -55,10 +48,15 @@ async function get(req, res) {
 }
 
 async function update(req, res) {
-  const email = Object.keys(req.body)[0];
-  req.session.carts[email] = req.body[email];
-  // need to implement check before updating
-  return res.send("Cart Updated Successfully");
+  const { email } = req.decodedUser;
+  const cart = req.body[email];
+  if (!cart) throw new ExpressError("unAuthorized", 401); // the email sent was not the user's email
+  try {
+    await storeToRedis(email, cart);
+  } catch (error) {
+    throw new ExpressError("redis storing error", 500);
+  }
+  return res.send(cart);
 }
 
 async function destroy(req, res, savedOrder) {
@@ -71,8 +69,4 @@ async function destroy(req, res, savedOrder) {
     });
   }
   return res.send("Cart deleted Successfully");
-}
-
-async function index(req, res) {
-  res.send(req.session.carts);
 }

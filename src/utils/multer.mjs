@@ -4,7 +4,7 @@ import dotenv from 'dotenv';
 dotenv.config();
 
 const validationType = {
-    image: ['image/png', 'image/jpg', 'image/jpeg'],
+    image: ['image/png', 'image/jpg', 'image/jpeg','image/webp'],
     files: ['application/pdf']
 }
 
@@ -41,7 +41,7 @@ function multerFn(type) {
         limits: {
             fileSize: 10 * 1024 * 1024 
         }
-    }).single('image');
+    }).array('image', 5)
 }
 
 export { multerFn,multerHandelErrors, validationType };

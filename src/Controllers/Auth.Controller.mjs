@@ -1,7 +1,13 @@
 import { UserModel } from "../Model/User.Model.mjs";
 import { validationResult } from "express-validator";
 import { sendVerificationEmail } from "../utils/sendmail.mjs";
-import { createToken } from "../utils/auth.mjs";
+import jwt from "jsonwebtoken";
+const maxAge = 3 * 24 * 60 * 60 * 60;
+const createToken = (id, email) => {
+  return jwt.sign({ id, email }, "iti os 44", {
+    expiresIn: maxAge,
+  });
+};
 
 const signup_get = (req, res) => {
   //res.render("signup");

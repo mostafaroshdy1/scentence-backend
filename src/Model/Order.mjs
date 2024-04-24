@@ -74,7 +74,14 @@ const orderSchema = new Schema(
     },
     status: {
       type: String,
-      enum: ["pending", "accepted", "rejected", "canceled", "delivered"],
+      enum: [
+        "pending",
+        "accepted",
+        "rejected",
+        "on way",
+        "cancelled",
+        "delivered",
+      ],
       required: true,
       default: "pending",
     },
@@ -84,6 +91,10 @@ const orderSchema = new Schema(
     paid: {
       type: Boolean,
       default: false,
+    },
+    extra: {
+      type: String,
+      required: false,
     },
   },
   {

@@ -49,26 +49,3 @@ app.use((err, req, res, next) => {
 app.listen(PORT, () => {
   console.log("http://localhost:" + PORT);
 });
-
-import redis from "redis";
-import { catchAsync } from "./src/utils/catchAsync.mjs";
-
-// const carts = {
-//   email: [
-//     {
-//       productId: 5,
-//       name: "Iphone",
-//       price: 210000,
-//       qty: 2,
-//       img: "url",
-//     },
-//   ],
-// };
-// async function redisConnect() {
-//   const client = redis.createClient();
-//   await client.connect();
-//   await client.del("myKey", JSON.stringify(carts));
-//   console.log(JSON.parse(await client.get("myKey")));
-// }
-
-// redisConnect();

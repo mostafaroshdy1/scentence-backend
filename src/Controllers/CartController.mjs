@@ -2,7 +2,10 @@ import { ExpressError } from "../utils/ExpressError.mjs";
 import Product from "../Model/Product.mjs";
 export { add, get, update, destroy, getFromRedis };
 import redis from "redis";
-const client = redis.createClient();
+
+const client = redis.createClient({
+  url: process.env.REDIS_URL || "redis://localhost:6379",
+});
 try {
   await client.connect();
 } catch (error) {

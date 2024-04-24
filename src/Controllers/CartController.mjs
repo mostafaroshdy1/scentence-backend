@@ -13,6 +13,7 @@ async function add(req, res) {
   const { email } = req.decodedUser;
   const { productId } = req.body;
   const qty = parseInt(req.body.qty);
+  const stock = (await Product.findById(productId)).stock;
   const product = await Product.findById(productId);
   if (!product) {
     throw new ExpressError("Invalid Product ID", 404);
@@ -23,24 +24,30 @@ async function add(req, res) {
     price: product.price,
     qty: qty,
     img: product.image,
+    stock: stock,
   };
 
   let cart = await getFromRedis(email);
   try {
     if (!cart) {
+      if (productToCart.qty > productToCart.stock)
+        throw new ExpressError("Not enough stock", 400);
       await storeToRedis(email, [productToCart]);
       cart = [productToCart];
     } else {
       const item = cart.find((el) => el.productId == productToCart.productId);
       if (item) {
         item.qty += qty;
+        item.stock = stock;
+        if (item.qty > item.stock)
+          throw new ExpressError("Not enough stock", 400);
       } else {
         cart.push(productToCart);
       }
       await storeToRedis(email, cart);
     }
   } catch (error) {
-    throw new ExpressError("Redis adding error", 500);
+    throw new ExpressError(error.message, error.statusCode);
   }
 
   return res.send(cart);
@@ -54,14 +61,20 @@ async function get(req, res) {
 
 async function update(req, res) {
   const { email } = req.decodedUser;
-  const cart = req.body[email];
+  const cart = req.body;
   if (!cart) throw new ExpressError("unAuthorized", 401); // the email sent was not the user's email
+  cart.forEach((element) => {
+    if (element.qty > element.stock)
+      throw new ExpressError("Not enough stock", 400);
+  });
+  const newCart = cart.filter((item) => item.qty > 0);
+
   try {
-    await storeToRedis(email, cart);
+    await storeToRedis(email, newCart);
   } catch (error) {
     throw new ExpressError("redis storing error", 500);
   }
-  return res.send(cart);
+  return res.send(newCart);
 }
 
 async function destroy(req, res) {

@@ -24,22 +24,27 @@ async function add(req, res) {
     img: product.image,
   };
 
-  let cart = await getFromRedis(email);
-  if (!cart) {
-    await storeToRedis(email, [productToCart]);
-    cart = [productToCart];
-  } else {
-    cart.push(productToCart);
-    await storeToRedis(email, cart);
+  if (!req.session.carts) {
+    req.session.carts = {};
   }
-
-  return res.send(cart);
+  if (!req.session.carts[email]) {
+    req.session.carts[email] = [productToCart];
+    req.session.save();
+  } else {
+    req.session.carts[email].push(productToCart);
+    req.session.save();
+  }
+  if (!req.body.reorder) {
+    return res.json("Prodect added successfully");
+  }
 }
 
 async function get(req, res) {
   const { email } = req.decodedUser;
-  const cart = await getFromRedis(email);
-  return res.send(cart);
+  if (!req.session.carts[email]) {
+    return res.status(200).send("Cart is Empty");
+  }
+  return res.status(200).json(req.session.carts[email]);
 }
 
 async function update(req, res) {
@@ -54,24 +59,14 @@ async function update(req, res) {
   return res.send(cart);
 }
 
-async function destroy(req, res) {
+async function destroy(req, res, savedOrder) {
   const { email } = req.decodedUser;
-  try {
-    await deleteFromRedis(email);
-  } catch {
-    throw new ExpressError("redis deletion error", 500);
+  delete req.session.carts[email];
+  if (savedOrder) {
+    return res.send({
+      message: "Cart deleted Successfully",
+      order: savedOrder,
+    });
   }
-  return res.send("Cart deleted successfully");
-}
-
-async function getFromRedis(email) {
-  const cart = JSON.parse(await client.get(email));
-  return cart;
-}
-async function storeToRedis(email, cart) {
-  await client.set(email, JSON.stringify(cart));
-}
-
-async function deleteFromRedis(email) {
-  await client.del(email);
+  return res.send("Cart deleted Successfully");
 }

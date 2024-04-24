@@ -49,7 +49,7 @@ const login_post = async (req, res) => {
   }
   try {
     const user = await UserModel.login(req.body.email, req.body.password);
-    const token = createToken(user._id, user.email, user.username);
+    const token = createToken(user._id);
     return res.status(200).json({ token: token, msg: "Login Success" });
   } catch (error) {
     return res.status(400).json({ Error: error.message });

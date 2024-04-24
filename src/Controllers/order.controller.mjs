@@ -4,11 +4,11 @@ import { catchAsync } from "../utils/catchAsync.mjs";
 import mongoose from "mongoose";
 import Stripe from "stripe";
 import { ExpressError } from "../utils/ExpressError.mjs";
-import { add, destroy } from "./CartController.mjs";
+import { getFromRedis } from "./CartController.mjs";
 const stripe = Stripe(process.env.STRIPE);
 
 const createOrder = catchAsync(async (req, res) => {
-  const cart = req.session.carts[req.decodedUser.email];
+  const cart = await getFromRedis(req.decodedUser.email);
   if (!cart) {
     throw new ExpressError("No items in the cart", 400);
   }
@@ -88,7 +88,7 @@ const createOrder = catchAsync(async (req, res) => {
   order.paymentId = stripeSession.id;
 
   const savedOrder = await order.save();
-  destroy(req, res, savedOrder);
+  return res.status(201).json(savedOrder);
 });
 
 const getAllOrders = catchAsync(async (req, res) => {
@@ -125,16 +125,15 @@ const deleteOrderById = catchAsync(async (req, res) => {
 });
 
 const cancelOrder = catchAsync(async (req, res) => {
-  const order = await Order.findById(req.params.id);
+  const order = await Order.findByIdAndUpdate(
+    req.params.id,
+    { status: "cancelled" },
+    { new: true }
+  );
   if (!order) {
     return res.status(404).json({ message: "Order Not Found" });
   }
-  if (order.status === "pending"){
-    order.status = "cancelled";
-    await order.save();
-    return res.status(200).json(order);
-  }
-  return res.status(400).json({ message: "Order can't be cancelled" });
+  res.status(200).json(order);
 });
 
 const viewOrdersOfUser = catchAsync(async (req, res) => {
@@ -142,31 +141,6 @@ const viewOrdersOfUser = catchAsync(async (req, res) => {
 
   const orders = await Order.find({ user: userId });
   res.status(200).json(orders);
-});
-const reOrder = catchAsync(async (req, res) => {
-  const orderId = req.params.id;
-  const order = await Order.findById(orderId);
-  if (!order) {
-    return res.status(404).json({ message: "Order Not Found" });
-  }
-  if (
-    order.status === "pending" ||
-    order.status === "on way" ||
-    order.status === "accepted"
-  ) {
-    return res.status(400).json({ message: "Order is not delivered yet" });
-  }
-  const products = await Product.find({
-    _id: { $in: Array.from(order.products.keys()) },
-  });
-
-  products.forEach(async (product) => {
-    req.body.productId = product._id;
-    req.body.qty = order.products.get(product._id).quantity;
-    req.body.reorder = true;
-    await add(req, res);
-  });
-  return res.status(201).json({ message: "Re-Order Done Successfully" });
 });
 
 export {
@@ -177,5 +151,4 @@ export {
   deleteOrderById,
   cancelOrder,
   viewOrdersOfUser,
-  reOrder,
 };

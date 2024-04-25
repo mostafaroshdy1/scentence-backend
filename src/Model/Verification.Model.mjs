@@ -1,5 +1,6 @@
 import mongoose from "mongoose";
-import { ExpressError } from "../utils/ExpressError.mjs";
+
+export { VerificationModel };
 
 const UserVerificationSchema = mongoose.Schema({
   userID: { type: String },
@@ -12,5 +13,3 @@ const VerificationModel = mongoose.model(
   "userverification",
   UserVerificationSchema
 );
-
-export { VerificationModel };

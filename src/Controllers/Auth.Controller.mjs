@@ -1,7 +1,13 @@
 import { UserModel } from "../Model/User.Model.mjs";
 import { validationResult } from "express-validator";
 import { sendVerificationEmail } from "../utils/sendmail.mjs";
-import { createToken } from "../utils/auth.mjs";
+import jwt from "jsonwebtoken";
+const maxAge = 3 * 24 * 60 * 60 * 60;
+const createToken = (id, email,role) => {
+  return jwt.sign({ id, email, role }, "iti os 44", {
+    expiresIn: maxAge,
+  });
+};
 
 const signup_get = (req, res) => {
   //res.render("signup");
@@ -32,7 +38,7 @@ const signup_post = async (req, res) => {
   const route = "/User/verify/";
   sendVerificationEmail({ _id: user._id, email: user.email }, subject,text,route);
 
-  const token = createToken(user._id);
+  const token = createToken(user._id, email, username);
   return res.status(200).json({
     token: token,
     msg: `${username} Registerd Successfully , A Verification Email Sent to your inbox `,
@@ -46,7 +52,7 @@ const login_post = async (req, res) => {
   }
   try {
     const user = await UserModel.login(req.body.email, req.body.password);
-    const token = createToken(user._id);
+    const token = createToken(user._id, user.email, user.role);
     return res.status(200).json({ token: token, msg: "Login Success" });
   } catch (error) {
     return res.status(400).json({ Error: error.message });

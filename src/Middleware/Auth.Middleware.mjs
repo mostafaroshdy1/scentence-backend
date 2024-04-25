@@ -1,5 +1,6 @@
 import jwt from "jsonwebtoken";
 import { UserModel } from "../Model/User.Model.mjs";
+import { ExpressError } from "../utils/ExpressError.mjs";
 
 //Authorization Middelware
 const requireAuth = (req, res, next) => {
@@ -16,6 +17,7 @@ const requireAuth = (req, res, next) => {
         return res.status(403).json({ Status: 403, msg: "Not Authorized" });
       } else {
         console.log("Auth", decodedToken);
+        console.log(decodedToken);
         next();
       }
     });
@@ -25,32 +27,20 @@ const requireAuth = (req, res, next) => {
 };
 
 //Check if the user logged in or not to display the data
-
-const checkUser = (req, res, next) => {
+function checkUser(req, res, next) {
   const authHeader = req.headers["authorization"];
-  if (!authHeader) {
-    return res.status(401).json({ error: "Authorization header is missing" });
-  }
+  if (!authHeader)
+    throw new ExpressError("Authorization header is missing", 400);
 
   const token = authHeader.split(" ")[1];
-  if (token) {
-    jwt.verify(token, "iti os 44", async (err, decodedToken) => {
-      if (err) {
-        console.log(err.message);
-        req.decodedUser = null;
-        next();
-      } else {
-        console.log(decodedToken);
-        let user = await UserModel.findById(decodedToken.id);
-        req.decodedUser = user;
-        console.log("Middleware", req.decodedUser);
-        next();
-      }
-    });
-  } else {
-    req.decodedUser = null;
+  if (!token) throw new ExpressError("Jwt bearer token is required", 400);
+  try {
+    const decodedToken = jwt.verify(token, "iti os 44");
+    req.decodedUser = decodedToken;
     next();
+  } catch (err) {
+    throw new ExpressError("Invalid token", 401);
   }
-};
+}
 
 export { requireAuth, checkUser };

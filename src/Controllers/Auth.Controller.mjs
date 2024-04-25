@@ -38,7 +38,7 @@ const signup_post = async (req, res) => {
   const route = "/User/verify/";
   sendVerificationEmail({ _id: user._id, email: user.email }, subject,text,route);
 
-  const token = createToken(user._id, email, username);
+  const token = createToken(user._id, user.email, user.username);
   return res.status(200).json({
     token: token,
     msg: `${username} Registerd Successfully , A Verification Email Sent to your inbox `,
@@ -52,7 +52,7 @@ const login_post = async (req, res) => {
   }
   try {
     const user = await UserModel.login(req.body.email, req.body.password);
-    const token = createToken(user._id, user.email, user.role);
+    const token = createToken(user._id, user.email, user.username,user.role);
     return res.status(200).json({ token: token, msg: "Login Success" });
   } catch (error) {
     return res.status(400).json({ Error: error.message });

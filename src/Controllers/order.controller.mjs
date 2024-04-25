@@ -14,8 +14,6 @@ const createOrder = catchAsync(async (req, res) => {
     throw new ExpressError("No items in the cart", 400);
   }
   let products = new Map();
-  let total = 0;
-
   cart.forEach((element) => {
     const productId = element.productId;
     const productQty = element.qty;
@@ -26,8 +24,6 @@ const createOrder = catchAsync(async (req, res) => {
     };
 
     products.set(productId, productData);
-
-    total += productPrice * productQty;
   });
 
   const session = await mongoose.startSession();
@@ -65,7 +61,7 @@ const createOrder = catchAsync(async (req, res) => {
     paymentMethod: req.body.paymentMethod,
     user: req.decodedUser.id,
     products: products,
-    total: total,
+    total: req.body.total,
   });
   const lineItems = cart.map((product) => ({
     price_data: {
@@ -167,7 +163,30 @@ const reOrder = catchAsync(async (req, res) => {
     req.body.reorder = true;
     await add(req, res);
   });
-  return res.status(201).json({ message: "Re-Order Done Successfully" });
+  return res
+    .status(201)
+    .json({ message: "Re-Order Done Successfully", products: products });
+});
+const makeDiscount = catchAsync(async (req, res) => {
+  const promoCode = req.body.promoCode;
+  let discount = 0;
+  switch (promoCode) {
+    case "10OFF":
+      discount = 0.1;
+      break;
+    case "30OFF":
+      discount = 0.3;
+      break;
+    case "50OFF":
+      discount = 0.5;
+      break;
+    case "70OFF":
+      discount = 0.7;
+      break;
+    default:
+      return res.status(400).json({ message: "Invalid Promo Code" });
+  }
+  return res.status(200).json({ discount: discount });
 });
 
 export {
@@ -179,4 +198,5 @@ export {
   cancelOrder,
   viewOrdersOfUser,
   reOrder,
+  makeDiscount,
 };

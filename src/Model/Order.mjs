@@ -96,6 +96,11 @@ const orderSchema = new Schema(
       type: String,
       required: false,
     },
+    promoCode: {
+      type: String,
+      enum: ["10OFF", "30OFF", "50OFF", "70OFF"],
+      required: false,
+    },
   },
   {
     timestamps: true,

@@ -27,6 +27,10 @@ const AddOrderValidation = [
     .withMessage("Payment method is required")
     .isIn(["cash", "credit"])
     .withMessage("Payment method must be either 'cash' or 'credit'"),
+  body("promoCode")
+    .optional()
+    .isIn(["10OFF", "30OFF", "50OFF", "70OFF"])
+    .withMessage("Invalid Promo Code"),
   (req, res, next) => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
@@ -40,7 +44,14 @@ const UpdateOrderValidation = [
   body("status")
     .notEmpty()
     .withMessage("Status is required")
-    .isIn(["cancelled", "accepted", "pending", "rejected", "delivered"])
+    .isIn([
+      "cancelled",
+      "accepted",
+      "pending",
+      "rejected",
+      "on way",
+      "delivered",
+    ])
     .withMessage("Status must be cancelled, delivered, or pending"),
   (req, res, next) => {
     const errors = validationResult(req);

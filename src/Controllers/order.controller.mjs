@@ -141,6 +141,7 @@ const viewOrdersOfUser = catchAsync(async (req, res) => {
   res.status(200).json(orders);
 });
 const reOrder = catchAsync(async (req, res) => {
+  let cart = [];
   const orderId = req.params.id;
   const order = await Order.findById(orderId);
   if (!order) {
@@ -157,15 +158,15 @@ const reOrder = catchAsync(async (req, res) => {
     _id: { $in: Array.from(order.products.keys()) },
   });
 
-  products.forEach(async (product) => {
+  for (const product of products) {
     req.body.productId = product._id;
     req.body.qty = order.products.get(product._id).quantity;
     req.body.reorder = true;
-    await add(req, res);
-  });
+    cart = await add(req, res);
+  }
   return res
     .status(201)
-    .json({ message: "Re-Order Done Successfully", products: products });
+    .json({ message: "Re-Order Done Successfully", products: products, cart:cart });
 });
 const makeDiscount = catchAsync(async (req, res) => {
   const promoCode = req.body.promoCode;

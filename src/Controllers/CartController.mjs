@@ -56,6 +56,9 @@ async function add(req, res) {
   if (!req.body.reorder) {
     return res.send(cart);
   }
+  else{
+    return cart;
+  }
 }
 
 async function get(req, res) {

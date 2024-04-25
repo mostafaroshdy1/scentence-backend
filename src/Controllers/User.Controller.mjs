@@ -1,5 +1,8 @@
-import { UserModel } from '../Model/User.Model.mjs';
-import { VerificationModel } from '../Model/Verification.Model.mjs';
+import { UserModel } from "../Model/User.Model.mjs";
+import { VerificationModel } from "../Model/Verification.Model.mjs";
+import { validationResult } from "express-validator";
+import bcrypt from "bcrypt";
+import { sendVerificationEmail } from "../utils/sendmail.mjs";
 import { catchAsync } from '../utils/catchAsync.mjs';
 
 const profile = (req, res) => {
@@ -28,8 +31,8 @@ const verify = async (req, res) => {
 
     const currentDate = new Date();
 
-    if (uid.expireAt > currentDate) {
-      return res.status(400).json({ status: 400, Error: 'Link Expired' });
+    if (uid.expireAt < currentDate) {
+      return res.status(400).json({ status: 400, Error: "Link Expired" });
     }
 
     const verified = await UserModel.updateOne({
@@ -46,6 +49,57 @@ const verify = async (req, res) => {
   } catch (err) {
     console.log(err);
     return res.status(400).json({ Status: 400, Error: 'Error Occured' });
+  }
+};
+
+
+const resetLink = async (req,res) => {
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    return res.status(400).json({ errors: errors.array() });
+  }
+  const {email} = req.body;
+
+  const user = await UserModel.findOne({email:email});
+
+  if(user){
+    const subject = "Password Reset";
+    const text = "Reset Your Password";
+    const route = "/User/ResetPassword/";
+    sendVerificationEmail({ _id: user._id, email: user.email }, subject,text,route);
+    console.log("Password reset Link Sent Successfully");
+    return res.status(200).json({status:200,msg:"Password Reset Link Sent Successfully"});
+  } else {
+    console.log("Failed To Send Password Reset Link");
+    return res.status(400).json({status:400,msg:"Failed To Send Password Reset Link"});
+  }
+};
+
+const resetLogic = async (req, res) => {
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    return res.status(400).json({ errors: errors.array() });
+  }
+
+  const { id } = req.params;
+
+  try {
+    const user = await UserModel.findOne({ _id: id });
+
+    if (user) {
+      const { password } = req.body;
+      const salt = await bcrypt.genSalt(10);
+      const hashedPassword = await bcrypt.hash(password, salt);
+      user.password = hashedPassword;
+      await user.save();
+
+      return res.status(200).json({ status: 200, message: "Password reset successful" });
+    } else {
+      return res.status(400).json({ status: 400, error: "User Not Found" });
+    }
+  } catch (error) {
+    console.error("Error resetting password:", error);
+    return res.status(500).json({ status: 500, error: "Internal Server Error" });
   }
 };
 
@@ -106,6 +160,9 @@ const UserController = {
   getUsers,
   getUser,
   countUsers,
+  resetLink,
+  resetLogic
 };
+
 
 export { UserController };

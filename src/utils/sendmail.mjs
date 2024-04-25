@@ -21,15 +21,15 @@ transporter.verify((err, Success) => {
   }
 });
 
-const sendVerificationEmail = async ({ _id, email }, res) => {
+const sendVerificationEmail = async ({ _id, email }, subject,text,baseRoute) => {
   const currentURL = "http://localhost:3000";
   const uniqueString = crypto.randomBytes(32).toString("hex");
   const mailOptions = {
     from: process.env.AUTH_EMAIL,
     to: email,
-    subject: "Verify your email",
-    html: `<p>Verify your email</p><br><a href="${
-      currentURL + "/User/verify/" + _id + "/" + uniqueString
+    subject: subject,
+    html: `<p>${text}</p><br><a href="${
+      currentURL + baseRoute + _id + "/" + uniqueString
     }">here</a>`,
   };
 

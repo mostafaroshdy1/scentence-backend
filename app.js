@@ -43,7 +43,7 @@ app.use(
 // app.use('/users', routeName);
 // app.use('/etc', routeName);
 // app.use('/etc', routeName);
-app.use(checkUser);
+// app.use(checkUser);
 app.use(AuthRoutes);
 app.use("/User", UserRoutes);
 app.use("/products", productRouter);

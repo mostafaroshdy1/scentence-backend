@@ -27,7 +27,10 @@ const signup_post = async (req, res) => {
     verified: false,
   });
 
-  sendVerificationEmail({ _id: user._id, email: user.email }, res);
+  const subject = "Account Verification";
+  const text = "Please Verify your account";
+  const route = "/User/verify/";
+  sendVerificationEmail({ _id: user._id, email: user.email }, subject,text,route);
 
   const token = createToken(user._id);
   return res.status(200).json({

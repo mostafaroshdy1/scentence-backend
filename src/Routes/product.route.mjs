@@ -1,45 +1,49 @@
-import express from "express";
+import express from 'express';
 const router = express.Router();
 import {
   multerFn,
   multerHandelErrors,
   validationType,
-} from "../utils/multer.mjs";
+} from '../utils/multer.mjs';
 import {
   createProduct,
   getAllProducts,
   getProductById,
   updateProductById,
   deleteProductById,
-  searchProduct
-} from "../Controllers/product.controller.mjs";
-import { AddProductValidation } from "../Validation/products.mjs";
+  getCategoryProductCount,
+  countProducts,
+} from '../Controllers/product.controller.mjs';
+import { AddProductValidation } from '../Validation/products.mjs';
 
 const upload = multerFn(validationType.image);
 
+router.get('/count', countProducts);
+
+router.get('/categoryCount', getCategoryProductCount);
+
 router.post(
-  "/",
+  '/',
   upload,
   multerHandelErrors,
   AddProductValidation,
   createProduct
 );
 
-router.get("/", getAllProducts);
+router.get('/', getAllProducts);
 
-router.get("/search", searchProduct);
-
-router.get("/:id", getProductById);
+router.get('/:id', getProductById);
 
 router.put(
-  "/:id",
+  '/:id',
   upload,
   multerHandelErrors,
   AddProductValidation,
   updateProductById
 );
 
-router.delete("/:id", deleteProductById);
+router.delete('/:id', deleteProductById);
 
+router.get('/category/:category', getAllProducts);
 
 export default router;

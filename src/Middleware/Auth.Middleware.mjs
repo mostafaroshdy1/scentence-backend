@@ -17,6 +17,7 @@ const requireAuth = (req, res, next) => {
         return res.status(403).json({ Status: 403, msg: "Not Authorized" });
       } else {
         console.log("Auth", decodedToken);
+        console.log(decodedToken);
         next();
       }
     });

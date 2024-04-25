@@ -3,8 +3,8 @@ import { validationResult } from "express-validator";
 import { sendVerificationEmail } from "../utils/sendmail.mjs";
 import jwt from "jsonwebtoken";
 const maxAge = 3 * 24 * 60 * 60 * 60;
-const createToken = (id, email) => {
-  return jwt.sign({ id, email }, "iti os 44", {
+const createToken = (id, email, role) => {
+  return jwt.sign({ id, email, role }, "iti os 44", {
     expiresIn: maxAge,
   });
 };
@@ -33,9 +33,17 @@ const signup_post = async (req, res) => {
     verified: false,
   });
 
-  sendVerificationEmail({ _id: user._id, email: user.email }, res);
+  const subject = "Account Verification";
+  const text = "Please Verify your account";
+  const route = "/User/verify/";
+  sendVerificationEmail(
+    { _id: user._id, email: user.email },
+    subject,
+    text,
+    route
+  );
 
-  const token = createToken(user._id, user.email, user.username);
+  const token = createToken(user._id, user.email, user.role, user.username);
   return res.status(200).json({
     token: token,
     msg: `${username} Registerd Successfully , A Verification Email Sent to your inbox `,
@@ -49,7 +57,7 @@ const login_post = async (req, res) => {
   }
   try {
     const user = await UserModel.login(req.body.email, req.body.password);
-    const token = createToken(user._id, user.email, user.username);
+    const token = createToken(user._id, user.email, user.role, user.username);
     return res.status(200).json({ token: token, msg: "Login Success" });
   } catch (error) {
     return res.status(400).json({ Error: error.message });

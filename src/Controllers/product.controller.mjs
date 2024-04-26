@@ -161,7 +161,6 @@ const getCategoryProductCount = catchAsync(async (req, res) => {
 
   return res.status(200).json({ categoryCounts });
 });
-// get count of products
 const countProducts = catchAsync(async (req, res) => {
   const count = await Product.countDocuments();
   return res.status(200).json({ count });

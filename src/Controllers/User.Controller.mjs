@@ -88,9 +88,7 @@ const resetLogic = async (req, res) => {
 
     if (user) {
       const { password } = req.body;
-      const salt = await bcrypt.genSalt(10);
-      const hashedPassword = await bcrypt.hash(password, salt);
-      user.password = hashedPassword;
+      user.password = password;
       await user.save();
 
       return res.status(200).json({ status: 200, message: "Password reset successful" });

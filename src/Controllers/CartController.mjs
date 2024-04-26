@@ -27,7 +27,7 @@ async function add(req, res) {
     name: product.title,
     price: product.price,
     qty: qty,
-    img: product.image,
+    img: product.image[0],
     stock: stock,
   };
 
@@ -55,8 +55,7 @@ async function add(req, res) {
   }
   if (!req.body.reorder) {
     return res.send(cart);
-  }
-  else{
+  } else {
     return cart;
   }
 }

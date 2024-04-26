@@ -164,9 +164,11 @@ const reOrder = catchAsync(async (req, res) => {
     req.body.reorder = true;
     cart = await add(req, res);
   }
-  return res
-    .status(201)
-    .json({ message: "Re-Order Done Successfully", products: products, cart:cart });
+  return res.status(201).json({
+    message: "Re-Order Done Successfully",
+    products: products,
+    cart: cart,
+  });
 });
 const makeDiscount = catchAsync(async (req, res) => {
   const promoCode = req.body.promoCode;

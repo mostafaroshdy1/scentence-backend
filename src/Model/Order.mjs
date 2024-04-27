@@ -74,18 +74,37 @@ const orderSchema = new Schema(
     },
     status: {
       type: String,
-      enum: ["pending", "accepted", "rejected", "canceled", "delivered"],
+      enum: [
+        "pending",
+        "accepted",
+        "rejected",
+        "on way",
+        "cancelled",
+        "delivered",
+      ],
       required: true,
       default: "pending",
     },
     paymentId: {
       type: String,
+      required: false,
     },
     paid: {
       type: Boolean,
       default: false,
     },
+    extra: {
+      type: String,
+      required: false,
+    },
+    promoCode: {
+      type: String,
+      enum: ["10OFF", "30OFF", "50OFF", "70OFF"],
+      required: false,
+    },
+    paymentUrl: { type: String, required: false },
   },
+
   {
     timestamps: true,
   }

@@ -5,16 +5,16 @@ import mongoose from "mongoose";
 import Stripe from "stripe";
 import { ExpressError } from "../utils/ExpressError.mjs";
 import { getFromRedis } from "./CartController.mjs";
+import { add, destroy, deleteFromRedis } from "./CartController.mjs";
 const stripe = Stripe(process.env.STRIPE);
 
 const createOrder = catchAsync(async (req, res) => {
+  const { email } = req.decodedUser;
   const cart = await getFromRedis(req.decodedUser.email);
   if (!cart) {
     throw new ExpressError("No items in the cart", 400);
   }
   let products = new Map();
-  let total = 0;
-
   cart.forEach((element) => {
     const productId = element.productId;
     const productQty = element.qty;
@@ -25,8 +25,6 @@ const createOrder = catchAsync(async (req, res) => {
     };
 
     products.set(productId, productData);
-
-    total += productPrice * productQty;
   });
 
   const session = await mongoose.startSession();
@@ -64,7 +62,7 @@ const createOrder = catchAsync(async (req, res) => {
     paymentMethod: req.body.paymentMethod,
     user: req.decodedUser.id,
     products: products,
-    total: total,
+    total: req.body.total,
   });
   const lineItems = cart.map((product) => ({
     price_data: {
@@ -78,17 +76,31 @@ const createOrder = catchAsync(async (req, res) => {
     quantity: product.qty,
   }));
 
-  const stripeSession = await stripe.checkout.sessions.create({
-    payment_method_types: ["card"],
-    line_items: lineItems,
-    mode: "payment",
-    success_url: "https://url.com", // will be changed later
-    cancel_url: "https://url.com", // will be changed later
-  });
-  order.paymentId = stripeSession.id;
-
+  const baseUrl = process.env.baseUrl || "http://localhost:4200";
+  let stripeSession;
+  if (req.body.paymentMethod === "credit") {
+    stripeSession = await stripe.checkout.sessions.create({
+      payment_method_types: ["card"],
+      line_items: lineItems,
+      mode: "payment",
+      success_url: baseUrl + `/orders/${order._id.toString()}`,
+      cancel_url: baseUrl + `/orders`, // will be changed later
+      expires_at: Math.floor(Date.now() / 1000) + 60 * 30, // will expire after 2 hours
+    });
+    order.paymentId = stripeSession.id;
+    order.paymentUrl = stripeSession.url;
+  }
   const savedOrder = await order.save();
-  return res.status(201).json(savedOrder);
+
+  let redirectUrl = stripeSession
+    ? stripeSession.url
+    : baseUrl + `/orders/${order._id.toString()}`;
+  try {
+    await deleteFromRedis(email);
+  } catch {
+    throw new ExpressError("redis deletion error", 500);
+  }
+  res.status(200).json({ message: "Order Created Successfully", redirectUrl });
 });
 
 const getAllOrders = catchAsync(async (req, res) => {
@@ -107,14 +119,19 @@ const getOrderById = catchAsync(async (req, res) => {
   }
   res.status(200).json({ message: "Order Found", order, products });
 });
+
 const updateOrderById = catchAsync(async (req, res) => {
-  const order = await Order.findByIdAndUpdate(req.params.id, req.body, {
-    new: true,
-  });
-  if (!order) {
+  const status = req.body.status;
+  const foundOrder = await Order.findById(req.params.id);
+
+  if (!foundOrder) {
     return res.status(404).json({ message: "Order Not Found" });
   }
-  res.status(200).json(order);
+
+  foundOrder.status = status;
+  await foundOrder.save();
+
+  return res.status(200).json(foundOrder);
 });
 const deleteOrderById = catchAsync(async (req, res) => {
   const order = await Order.findByIdAndDelete(req.params.id);
@@ -125,15 +142,17 @@ const deleteOrderById = catchAsync(async (req, res) => {
 });
 
 const cancelOrder = catchAsync(async (req, res) => {
-  const order = await Order.findByIdAndUpdate(
-    req.params.id,
-    { status: "cancelled" },
-    { new: true }
-  );
+  const order = await Order.findById(req.params.id);
   if (!order) {
     return res.status(404).json({ message: "Order Not Found" });
   }
-  res.status(200).json(order);
+  if (order.status === "pending") {
+    order.status = "cancelled";
+    await order.save();
+    await reStock(order._id);
+    return res.status(200).json(order);
+  }
+  return res.status(400).json({ message: "Order can't be cancelled" });
 });
 
 const viewOrdersOfUser = catchAsync(async (req, res) => {
@@ -142,6 +161,106 @@ const viewOrdersOfUser = catchAsync(async (req, res) => {
   const orders = await Order.find({ user: userId });
   res.status(200).json(orders);
 });
+const reOrder = catchAsync(async (req, res) => {
+  let cart = [];
+  const orderId = req.params.id;
+  const order = await Order.findById(orderId);
+  if (!order) {
+    return res.status(404).json({ message: "Order Not Found" });
+  }
+  if (
+    order.status === "pending" ||
+    order.status === "on way" ||
+    order.status === "accepted"
+  ) {
+    return res.status(400).json({ message: "Order is not delivered yet" });
+  }
+  const products = await Product.find({
+    _id: { $in: Array.from(order.products.keys()) },
+  });
+
+  for (const product of products) {
+    req.body.productId = product._id;
+    req.body.qty = order.products.get(product._id).quantity;
+    req.body.reorder = true;
+    cart = await add(req, res);
+  }
+
+  return res
+    .status(201)
+    .json({
+      message: "Re-Order Done Successfully",
+      products: products,
+      cart: cart,
+    });
+});
+const makeDiscount = catchAsync(async (req, res) => {
+  const promoCode = req.body.promoCode;
+  let discount = 0;
+  switch (promoCode) {
+    case "10OFF":
+      discount = 0.1;
+      break;
+    case "30OFF":
+      discount = 0.3;
+      break;
+    case "50OFF":
+      discount = 0.5;
+      break;
+    case "70OFF":
+      discount = 0.7;
+      break;
+    default:
+      return res.status(400).json({ message: "Invalid Promo Code" });
+  }
+  return res.status(200).json({ discount: discount });
+});
+
+async function confirmPayment(req, res) {
+  const sig = req.headers["stripe-signature"];
+  const endpointSecret =
+    "whsec_d520af016a6a74eec500f07724791570a5c61b9a238bd8948dc0d950f5176fed";
+  let event;
+  // console.log(req.body);
+  try {
+    event = stripe.webhooks.constructEvent(req.body, sig, endpointSecret);
+  } catch (err) {
+    // console.log(err);
+    res.status(400).send(`Webhook Error: ${err.message}`);
+    return;
+  }
+  const session = event.data.object;
+  switch (event.type) {
+    case "checkout.session.completed":
+      await Order.findOneAndUpdate(
+        { paymentId: session.id },
+        { status: "accepted" }
+      );
+    case "checkout.session.expired":
+      const order = await Order.findOneAndUpdate(
+        { paymentId: session.id },
+        { status: "cancelled" }
+      );
+      await reStock(order._id);
+    default:
+  }
+  res.send();
+}
+
+async function reStock(orderId) {
+  const order = await Order.findById(orderId);
+  const productIds = Array.from(order.products.keys());
+  const updateOperations = productIds.map((productId) => {
+    const quantityCancelled = order.products.get(productId).quantity;
+    return {
+      updateOne: {
+        filter: { _id: productId },
+        update: { $inc: { stock: quantityCancelled } },
+      },
+    };
+  });
+  await Product.bulkWrite(updateOperations);
+}
 
 export {
   createOrder,
@@ -151,4 +270,7 @@ export {
   deleteOrderById,
   cancelOrder,
   viewOrdersOfUser,
+  reOrder,
+  makeDiscount,
+  confirmPayment,
 };

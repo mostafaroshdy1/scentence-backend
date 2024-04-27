@@ -186,13 +186,11 @@ const reOrder = catchAsync(async (req, res) => {
     cart = await add(req, res);
   }
 
-  return res
-    .status(201)
-    .json({
-      message: "Re-Order Done Successfully",
-      products: products,
-      cart: cart,
-    });
+  return res.status(201).json({
+    message: "Re-Order Done Successfully",
+    products: products,
+    cart: cart,
+  });
 });
 const makeDiscount = catchAsync(async (req, res) => {
   const promoCode = req.body.promoCode;
@@ -219,6 +217,7 @@ const makeDiscount = catchAsync(async (req, res) => {
 async function confirmPayment(req, res) {
   const sig = req.headers["stripe-signature"];
   const endpointSecret =
+    process.env.STRIPE_SIG ||
     "whsec_d520af016a6a74eec500f07724791570a5c61b9a238bd8948dc0d950f5176fed";
   let event;
   // console.log(req.body);

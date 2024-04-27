@@ -5,10 +5,11 @@ import mongoose from "mongoose";
 import Stripe from "stripe";
 import { ExpressError } from "../utils/ExpressError.mjs";
 import { getFromRedis } from "./CartController.mjs";
-import { add, destroy } from "./CartController.mjs";
+import { add, destroy, deleteFromRedis } from "./CartController.mjs";
 const stripe = Stripe(process.env.STRIPE);
 
 const createOrder = catchAsync(async (req, res) => {
+  const { email } = req.decodedUser;
   const cart = await getFromRedis(req.decodedUser.email);
   if (!cart) {
     throw new ExpressError("No items in the cart", 400);
@@ -75,17 +76,29 @@ const createOrder = catchAsync(async (req, res) => {
     quantity: product.qty,
   }));
 
-  const stripeSession = await stripe.checkout.sessions.create({
-    payment_method_types: ["card"],
-    line_items: lineItems,
-    mode: "payment",
-    success_url: "https://url.com", // will be changed later
-    cancel_url: "https://url.com", // will be changed later
-  });
-  order.paymentId = stripeSession.id;
-
+  const baseUrl = process.env.baseUrl || "http://localhost:4200";
+  let stripeSession;
+  if (req.body.paymentMethod === "credit") {
+    stripeSession = await stripe.checkout.sessions.create({
+      payment_method_types: ["card"],
+      line_items: lineItems,
+      mode: "payment",
+      success_url: baseUrl + `/orders/${order._id.toString()}`,
+      cancel_url: baseUrl, // will be changed later
+    });
+    order.paymentId = stripeSession.id;
+  }
   const savedOrder = await order.save();
-  destroy(req, res, savedOrder);
+
+  let redirectUrl = stripeSession
+    ? stripeSession.url
+    : baseUrl + `/orders/${order._id.toString()}`;
+  try {
+    await deleteFromRedis(email);
+  } catch {
+    throw new ExpressError("redis deletion error", 500);
+  }
+  res.status(200).json({ message: "Order Created Successfully", redirectUrl });
 });
 
 const getAllOrders = catchAsync(async (req, res) => {
@@ -104,6 +117,7 @@ const getOrderById = catchAsync(async (req, res) => {
   }
   res.status(200).json({ message: "Order Found", order, products });
 });
+
 const updateOrderById = catchAsync(async (req, res) => {
   const order = await Order.findByIdAndUpdate(req.params.id, req.body, {
     new: true,

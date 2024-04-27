@@ -1,6 +1,6 @@
 import { ExpressError } from "../utils/ExpressError.mjs";
 import Product from "../Model/Product.mjs";
-export { add, get, update, destroy, getFromRedis };
+export { add, get, update, destroy, getFromRedis, deleteFromRedis };
 import redis from "redis";
 
 const client = redis.createClient({
@@ -84,19 +84,19 @@ async function update(req, res) {
   return res.send(newCart);
 }
 
-async function destroy(req, res, savedOrder) {
+async function destroy(req, res) {
   const { email } = req.decodedUser;
   try {
     await deleteFromRedis(email);
   } catch {
     throw new ExpressError("redis deletion error", 500);
   }
-  if (savedOrder) {
-    return res.send({
-      message: "Cart deleted Successfully",
-      order: savedOrder,
-    });
-  }
+  // if (savedOrder) {
+  //   return res.send({
+  //     message: "Cart deleted Successfully",
+  //     order: savedOrder,
+  //   });
+  // }
   return res.send("Cart deleted successfully");
 }
 

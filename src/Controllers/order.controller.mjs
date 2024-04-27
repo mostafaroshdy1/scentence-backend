@@ -84,9 +84,11 @@ const createOrder = catchAsync(async (req, res) => {
       line_items: lineItems,
       mode: "payment",
       success_url: baseUrl + `/orders/${order._id.toString()}`,
-      cancel_url: baseUrl, // will be changed later
+      cancel_url: baseUrl + `/orders`, // will be changed later
+      expires_at: Math.floor(Date.now() / 1000) + 60 * 30, // will expire after 2 hours
     });
     order.paymentId = stripeSession.id;
+    order.paymentUrl = stripeSession.url;
   }
   const savedOrder = await order.save();
 
@@ -143,6 +145,7 @@ const cancelOrder = catchAsync(async (req, res) => {
   if (order.status === "pending") {
     order.status = "cancelled";
     await order.save();
+    await reStock(order._id);
     return res.status(200).json(order);
   }
   return res.status(400).json({ message: "Order can't be cancelled" });
@@ -206,6 +209,52 @@ const makeDiscount = catchAsync(async (req, res) => {
   return res.status(200).json({ discount: discount });
 });
 
+async function confirmPayment(req, res) {
+  const sig = req.headers["stripe-signature"];
+  const endpointSecret =
+    "whsec_d520af016a6a74eec500f07724791570a5c61b9a238bd8948dc0d950f5176fed";
+  let event;
+  // console.log(req.body);
+  try {
+    event = stripe.webhooks.constructEvent(req.body, sig, endpointSecret);
+  } catch (err) {
+    // console.log(err);
+    res.status(400).send(`Webhook Error: ${err.message}`);
+    return;
+  }
+  const session = event.data.object;
+  switch (event.type) {
+    case "checkout.session.completed":
+      await Order.findOneAndUpdate(
+        { paymentId: session.id },
+        { status: "accepted" }
+      );
+    case "checkout.session.expired":
+      const order = await Order.findOneAndUpdate(
+        { paymentId: session.id },
+        { status: "cancelled" }
+      );
+      await reStock(order._id);
+    default:
+  }
+  res.send();
+}
+
+async function reStock(orderId) {
+  const order = await Order.findById(orderId);
+  const productIds = Array.from(order.products.keys());
+  const updateOperations = productIds.map((productId) => {
+    const quantityCancelled = order.products.get(productId).quantity;
+    return {
+      updateOne: {
+        filter: { _id: productId },
+        update: { $inc: { stock: quantityCancelled } },
+      },
+    };
+  });
+  await Product.bulkWrite(updateOperations);
+}
+
 export {
   createOrder,
   getAllOrders,
@@ -216,4 +265,5 @@ export {
   viewOrdersOfUser,
   reOrder,
   makeDiscount,
+  confirmPayment,
 };

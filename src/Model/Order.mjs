@@ -87,6 +87,7 @@ const orderSchema = new Schema(
     },
     paymentId: {
       type: String,
+      required: false,
     },
     paid: {
       type: Boolean,
@@ -101,7 +102,9 @@ const orderSchema = new Schema(
       enum: ["10OFF", "30OFF", "50OFF", "70OFF"],
       required: false,
     },
+    paymentUrl: { type: String, required: false },
   },
+
   {
     timestamps: true,
   }

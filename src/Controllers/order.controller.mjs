@@ -105,13 +105,17 @@ const getOrderById = catchAsync(async (req, res) => {
   res.status(200).json({ message: "Order Found", order, products });
 });
 const updateOrderById = catchAsync(async (req, res) => {
-  const order = await Order.findByIdAndUpdate(req.params.id, req.body, {
-    new: true,
-  });
-  if (!order) {
+  const status = req.body.status;
+  const foundOrder = await Order.findById(req.params.id);
+
+  if (!foundOrder) {
     return res.status(404).json({ message: "Order Not Found" });
   }
-  res.status(200).json(order);
+
+  foundOrder.status = status;
+  await foundOrder.save();
+
+  return res.status(200).json(foundOrder);
 });
 const deleteOrderById = catchAsync(async (req, res) => {
   const order = await Order.findByIdAndDelete(req.params.id);
@@ -164,11 +168,14 @@ const reOrder = catchAsync(async (req, res) => {
     req.body.reorder = true;
     cart = await add(req, res);
   }
-  return res.status(201).json({
-    message: "Re-Order Done Successfully",
-    products: products,
-    cart: cart,
-  });
+
+  return res
+    .status(201)
+    .json({
+      message: "Re-Order Done Successfully",
+      products: products,
+      cart: cart,
+    });
 });
 const makeDiscount = catchAsync(async (req, res) => {
   const promoCode = req.body.promoCode;

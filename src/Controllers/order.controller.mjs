@@ -10,6 +10,8 @@ const stripe = Stripe(process.env.STRIPE);
 
 const createOrder = catchAsync(async (req, res) => {
   const { email } = req.decodedUser;
+  let total = 0;
+  let discountValue=0;
   const cart = await getFromRedis(req.decodedUser.email);
   if (!cart) {
     throw new ExpressError("No items in the cart", 400);
@@ -19,6 +21,7 @@ const createOrder = catchAsync(async (req, res) => {
     const productId = element.productId;
     const productQty = element.qty;
     const productPrice = element.price;
+    total += productQty * productPrice;
     const productData = {
       product: productId,
       quantity: productQty,
@@ -50,6 +53,11 @@ const createOrder = catchAsync(async (req, res) => {
     throw new ExpressError("Product stock is not enough", 409);
   }
   const maxOrder = await Order.find().sort({ orderId: -1 }).limit(1);
+  if(req.body.promoCode){
+    discountValue=calculateDiscount(req,res);
+    total=total-(total*discountValue);
+  }
+  console.log("this is total",total);
   const order = new Order({
     orderId: maxOrder.length === 0 ? 1 : maxOrder[0].orderId + 1,
     apartment: req.body.apartment,
@@ -62,7 +70,7 @@ const createOrder = catchAsync(async (req, res) => {
     paymentMethod: req.body.paymentMethod,
     user: req.decodedUser.id,
     products: products,
-    total: req.body.total,
+    total:total,
   });
   const lineItems = cart.map((product) => ({
     price_data: {
@@ -192,7 +200,7 @@ const reOrder = catchAsync(async (req, res) => {
     cart: cart,
   });
 });
-const makeDiscount = catchAsync(async (req, res) => {
+const calculateDiscount = (req, res) => {
   const promoCode = req.body.promoCode;
   let discount = 0;
   switch (promoCode) {
@@ -209,8 +217,16 @@ const makeDiscount = catchAsync(async (req, res) => {
       discount = 0.7;
       break;
     default:
-      return res.status(400).json({ message: "Invalid Promo Code" });
+      discount=-1;
   }
+  return discount;
+
+};
+const makeDiscount = catchAsync(async (req, res) => {
+  const discount =calculateDiscount(req, res);
+   if(discount<0){
+      return res.status(400).json({ message: "Invalid Promo Code" });
+   }
   return res.status(200).json({ discount: discount });
 });
 

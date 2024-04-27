@@ -44,15 +44,10 @@ const UpdateOrderValidation = [
   body("status")
     .notEmpty()
     .withMessage("Status is required")
-    .isIn([
-      "cancelled",
-      "accepted",
-      "pending",
-      "rejected",
-      "on way",
-      "delivered",
-    ])
-    .withMessage("Status must be cancelled, delivered, or pending"),
+    .isIn(["accepted", "pending", "rejected", "on way", "delivered"])
+    .withMessage(
+      "Status must be accepted,rejected,on way, delivered, or pending"
+    ),
   (req, res, next) => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {

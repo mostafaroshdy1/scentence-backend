@@ -11,12 +11,16 @@ import {
   viewOrdersOfUser,
   makeDiscount,
   reOrder,
+  countOrders,
 } from "../Controllers/order.controller.mjs";
 
 import {
   AddOrderValidation,
   UpdateOrderValidation,
 } from "../Validation/orders.mjs";
+
+
+router.get("/count", countOrders);
 
 router.post("/", AddOrderValidation, createOrder);
 router.get("/allOrders", getAllOrders);

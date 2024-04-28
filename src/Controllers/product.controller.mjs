@@ -166,6 +166,45 @@ const countProducts = catchAsync(async (req, res) => {
   const count = await Product.countDocuments();
   return res.status(200).json({ count });
 });
+const addRating = catchAsync(async (req, res) => {
+  const product_id = req.body.productId;
+  const { rating } = req.body;
+  const product = await Product.findById(product_id);
+  if (!product) {
+    return res.status(404).json({ message: "Product Not Found" });
+  }
+  if (rating < 1 || rating > 5) {
+    return res.status(400).json({ message: "Rating must be between 1 and 5" });
+  }
+  product.rating[rating] += 1;
+  product.totalRating.user.push(req.decodedUser.id);
+  product.totalRating.rating = rating;
+  product.save();
+  return res
+    .status(200)
+    .json({ message: "rating added successfully", product: product });
+});
+const getRating = catchAsync(async (req, res) => {
+  const product_id = req.params.productId;
+  const product = await Product.findById(product_id);
+  if (!product) {
+    return res.status(404).json({ message: "Product Not Found" });
+  }
+  let totalPeople = 0;
+  let totalSum = 0;
+  let average = 0;
+  let rating;
+  for (let i = 1; i <= 5; i++) {
+    totalPeople += product.rating[i];
+    totalSum += i * product.rating[i];
+  }
+  average = totalSum / totalPeople;
+  rating = Math.round(((average - 1) / (5 - 1)) * 5);
+  if (isNaN(rating)) {
+    rating = 0;
+  }
+  return res.status(200).json({ rating });
+});
 
 export {
   createProduct,
@@ -175,4 +214,6 @@ export {
   deleteProductById,
   getCategoryProductCount,
   countProducts,
+  addRating,
+  getRating,
 };

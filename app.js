@@ -9,11 +9,6 @@ import orderRoutes from "./src/Routes/order.route.mjs";
 import cors from "cors";
 import { router as webhookRoutes } from "./src/Routes/webhook.route.mjs";
 
-import { checkUser } from "./src/Middleware/Auth.Middleware.mjs";
-
-import productRouter from "./src/Routes/product.route.mjs";
-import orderRoutes from "./src/Routes/order.route.mjs";
-import cors from "cors";
 import mongoose from "mongoose";
 
 import dotenv from "dotenv";

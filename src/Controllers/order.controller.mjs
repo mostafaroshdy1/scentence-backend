@@ -277,6 +277,12 @@ async function reStock(orderId) {
   await Product.bulkWrite(updateOperations);
 }
 
+
+async function countOrders(req, res) {
+  const count = await Order.countDocuments();
+  res.json({ count });
+}
+
 export {
   createOrder,
   getAllOrders,
@@ -288,4 +294,5 @@ export {
   reOrder,
   makeDiscount,
   confirmPayment,
+  countOrders
 };

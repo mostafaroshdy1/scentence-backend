@@ -29,6 +29,7 @@ const productSchema = new Schema(
     stock: {
       type: Number,
       required: true,
+      min: 0,
     },
     rating: {
       1: {

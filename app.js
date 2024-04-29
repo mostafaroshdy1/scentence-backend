@@ -3,6 +3,7 @@ import { connectToDB } from './src/utils/db.mjs';
 import { ExpressError } from './src/utils/ExpressError.mjs';
 import { AuthRoutes } from './src/Routes/Auth.Routes.mjs';
 import { UserRoutes } from './src/Routes/User.Routes.mjs';
+
 import { checkUser } from './src/Middleware/Auth.Middleware.mjs';
 
 import productRouter from './src/Routes/product.route.mjs';
@@ -43,34 +44,11 @@ app.all('*', (req, res, next) => {
 
 // Error handling middleware
 app.use((err, req, res, next) => {
-	const { statusCode = 500 } = err;
-	if (!err.message) err.message = 'Oh No, Something Went Wrong';
-	return res.status(statusCode).json(err.message);
+  const { statusCode = 500 } = err;
+  if (!err.message) err.message = 'Oh No, Something Went Wrong';
+  return res.status(statusCode).json(err.message);
 });
 
 app.listen(PORT, () => {
-	console.log('http://localhost:' + PORT);
+  console.log('http://localhost:' + PORT);
 });
-
-import redis from 'redis';
-import { catchAsync } from './src/utils/catchAsync.mjs';
-
-// const carts = {
-//   email: [
-//     {
-//       productId: 5,
-//       name: "Iphone",
-//       price: 210000,
-//       qty: 2,
-//       img: "url",
-//     },
-//   ],
-// };
-// async function redisConnect() {
-//   const client = redis.createClient();
-//   await client.connect();
-//   await client.del("myKey", JSON.stringify(carts));
-//   console.log(JSON.parse(await client.get("myKey")));
-// }
-
-// redisConnect();

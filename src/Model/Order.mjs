@@ -103,6 +103,7 @@ const orderSchema = new Schema(
       required: false,
     },
     paymentUrl: { type: String, required: false },
+    discount: { type: Number, required: false },
   },
 
   {

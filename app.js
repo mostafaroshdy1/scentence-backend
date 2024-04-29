@@ -19,6 +19,8 @@ import { router as wishListRoutes } from "./src/Routes/wishList.route.mjs";
 import Order from "./src/Model/Order.mjs";
 import Product from "./src/Model/Product.mjs";
 
+import { router as profileRoutes } from './src/Routes/profile.route.mjs';
+
 connectToDB();
 const PORT = process.env.PORT || 3000;
 const app = express();
@@ -35,11 +37,13 @@ app.use(express.urlencoded({ extended: true })); // for parsing application/x-ww
 app.use(AuthRoutes);
 app.use(checkUser);
 
+
 app.use("/User", UserRoutes);
 app.use("/products", productRouter);
 app.use("/cart", cartRoutes);
 app.use("/orders", orderRoutes);
 app.use("/wishlist", wishListRoutes);
+app.use('/profile', profileRoutes);
 
 //  Any Invalid routes
 app.all("*", (req, res, next) => {

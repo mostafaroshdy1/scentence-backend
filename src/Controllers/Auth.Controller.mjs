@@ -1,7 +1,7 @@
-import { UserModel } from "../Model/User.Model.mjs";
-import { validationResult } from "express-validator";
-import { sendVerificationEmail } from "../utils/sendmail.mjs";
-import jwt from "jsonwebtoken";
+import { UserModel } from '../Model/User.Model.mjs';
+import { validationResult } from 'express-validator';
+import { sendVerificationEmail } from '../utils/sendmail.mjs';
+import jwt from 'jsonwebtoken';
 const maxAge = 3 * 24 * 60 * 60 * 60;
 const createToken = (id, email, role) => {
   return jwt.sign({ id, email, role }, "iti os 44", {
@@ -10,28 +10,27 @@ const createToken = (id, email, role) => {
 };
 
 const signup_get = (req, res) => {
-  //res.render("signup");
+	//res.render("signup");
 };
 
 const login_get = (req, res) => {
-  //res.render("login");
+	//res.render("login");
 };
 
 const signup_post = async (req, res) => {
-  const errors = validationResult(req);
-  if (!errors.isEmpty()) {
-    return res.status(400).json({ errors: errors.array() });
-  }
-  const { email, username, password, image, gender } = req.body;
+	const errors = validationResult(req);
+	if (!errors.isEmpty()) {
+		return res.status(400).json({ errors: errors.array() });
+	}
+	const { email, username, password, gender } = req.body;
 
-  const user = await UserModel.create({
-    email,
-    username,
-    password,
-    image,
-    gender,
-    verified: false,
-  });
+	const user = await UserModel.create({
+		email,
+		username,
+		password,
+		gender,
+		verified: false,
+	});
 
   const subject = "Account Verification";
   const text = "Please Verify your account";

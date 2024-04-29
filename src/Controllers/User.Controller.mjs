@@ -4,6 +4,16 @@ import { validationResult } from "express-validator";
 import bcrypt from "bcrypt";
 import { sendVerificationEmail } from "../utils/sendmail.mjs";
 import { catchAsync } from '../utils/catchAsync.mjs';
+import jwt from "jsonwebtoken";
+
+const maxAge = 3 * 24 * 60 * 60 * 60;
+const createToken = (id, email,role) => {
+  return jwt.sign({ id, email, role }, "iti os 44", {
+    expiresIn: maxAge,
+  });
+};
+
+
 
 const profile = (req, res) => {
   const user = req.decodedUser;
@@ -88,9 +98,7 @@ const resetLogic = async (req, res) => {
 
     if (user) {
       const { password } = req.body;
-      const salt = await bcrypt.genSalt(10);
-      const hashedPassword = await bcrypt.hash(password, salt);
-      user.password = hashedPassword;
+      user.password = password;
       await user.save();
 
       return res.status(200).json({ status: 200, message: "Password reset successful" });
@@ -102,6 +110,41 @@ const resetLogic = async (req, res) => {
     return res.status(500).json({ status: 500, error: "Internal Server Error" });
   }
 };
+
+const emailUpdate = async (req, res) => {
+	console.log('update email start');
+	const errors = validationResult(req);
+	if (!errors.isEmpty()) {
+		return res.status(400).json({ errors: errors.array() });
+	}
+	const { email } = req.decodedUser;
+	const newEmail = req.body.email;
+
+	const user = await UserModel.findOneAndUpdate(
+		{
+			email: email,
+		},
+		{ $set: { email: newEmail, verified: false } },
+    {returnDocument: 'after'}
+	);
+
+	if (user) {
+		const token = createToken(user._id, user.email, user.role);
+    const subject = "Account Verification";
+    const text = "Please Verify your account";
+    const route = "/User/verify/";
+
+    sendVerificationEmail({ _id: user._id, email: user.email }, subject,text,route);
+		return res.status(200).json({
+			token: token,
+			msg: `${newEmail} updated successfully`,
+		});
+	} else {
+		return res.status(404).json({ error: 'user not found' });
+	}
+};
+
+
 
 // Admin
 const deleteUser = catchAsync(async (req, res) => {
@@ -161,7 +204,8 @@ const UserController = {
   getUser,
   countUsers,
   resetLink,
-  resetLogic
+  resetLogic,
+  emailUpdate
 };
 
 

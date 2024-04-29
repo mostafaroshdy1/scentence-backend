@@ -23,4 +23,7 @@ UserRoutes.post("/ResetPassword",validateEmail ,UserController.resetLink);
 UserRoutes.put("/ResetPassword/:id/",validatePassword ,UserController.resetLogic);
 
 
+UserRoutes.put("/email" , validateEmail, UserController.emailUpdate);
+
+
 export { UserRoutes };

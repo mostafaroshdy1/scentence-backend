@@ -20,9 +20,9 @@ import { AddProductValidation } from "../Validation/products.mjs";
 
 const upload = multerFn(validationType.image);
 
-router.get("/:id", getProductById);
-
 router.get("/count", countProducts);
+
+router.get("/:id", getProductById);
 
 router.get("/categoryCount", getCategoryProductCount);
 

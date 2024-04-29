@@ -33,9 +33,10 @@ async function update(req, res) {
 	}
 
 	let updatedUser;
-	console.log(user, email, req.body);
-	if (req.file) {
-		const result = await cloudinary.uploader.upload(req.file.path);
+	console.log(req.files);
+	console.log(req.body);
+	if (req.files && req.files.length) {
+		const result = await cloudinary.uploader.upload(req.files[0].path);
 		updatedUser = await UserModel.findByIdAndUpdate(
 			user._id,
 			{ ...req.body, image: result.secure_url },

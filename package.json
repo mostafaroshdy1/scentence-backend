@@ -29,7 +29,8 @@
     "nodemailer": "^6.9.13",
     "nodemon": "^3.1.0",
     "redis": "^4.6.13",
-    "uuid": "^9.0.1",
-    "stripe": "^15.3.0"
+    "stars-schema": "^1.0.1",
+    "stripe": "^15.3.0",
+    "uuid": "^9.0.1"
   }
 }

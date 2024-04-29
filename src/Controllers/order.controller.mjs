@@ -11,7 +11,8 @@ const stripe = Stripe(process.env.STRIPE);
 const createOrder = catchAsync(async (req, res) => {
   const { email } = req.decodedUser;
   let total = 0;
-  let discountValue=0;
+  let discountValue = 0;
+  let shippingAmount = 30;
   const cart = await getFromRedis(req.decodedUser.email);
   if (!cart) {
     throw new ExpressError("No items in the cart", 400);
@@ -53,11 +54,12 @@ const createOrder = catchAsync(async (req, res) => {
     throw new ExpressError("Product stock is not enough", 409);
   }
   const maxOrder = await Order.find().sort({ orderId: -1 }).limit(1);
-  if(req.body.promoCode){
-    discountValue=calculateDiscount(req,res);
-    total=total-(total*discountValue);
+  if (req.body.promoCode) {
+    discountValue = calculateDiscount(req, res);
+    total = total - total * discountValue;
+    req.body.promoCode = undefined;
   }
-  console.log("this is total",total);
+  console.log("this is total", total);
   const order = new Order({
     orderId: maxOrder.length === 0 ? 1 : maxOrder[0].orderId + 1,
     apartment: req.body.apartment,
@@ -70,7 +72,8 @@ const createOrder = catchAsync(async (req, res) => {
     paymentMethod: req.body.paymentMethod,
     user: req.decodedUser.id,
     products: products,
-    total:total,
+    total: total + shippingAmount,
+    discount: discountValue,
   });
   const lineItems = cart.map((product) => ({
     price_data: {
@@ -79,10 +82,21 @@ const createOrder = catchAsync(async (req, res) => {
         name: product.name,
         images: [product.img],
       },
-      unit_amount: product.price * 100,
+      unit_amount: product.price * 100 - product.price * 100 * discountValue,
     },
     quantity: product.qty,
   }));
+
+  lineItems.push({
+    price_data: {
+      currency: "usd",
+      product_data: {
+        name: "Shipping",
+      },
+      unit_amount: shippingAmount * 100,
+    },
+    quantity: 1,
+  });
 
   const baseUrl = process.env.baseUrl || "http://localhost:4200";
   let stripeSession;
@@ -217,16 +231,15 @@ const calculateDiscount = (req, res) => {
       discount = 0.7;
       break;
     default:
-      discount=-1;
+      discount = -1;
   }
   return discount;
-
 };
 const makeDiscount = catchAsync(async (req, res) => {
-  const discount =calculateDiscount(req, res);
-   if(discount<0){
-      return res.status(400).json({ message: "Invalid Promo Code" });
-   }
+  const discount = calculateDiscount(req, res);
+  if (discount < 0) {
+    return res.status(400).json({ message: "Invalid Promo Code" });
+  }
   return res.status(200).json({ discount: discount });
 });
 
@@ -277,7 +290,6 @@ async function reStock(orderId) {
   await Product.bulkWrite(updateOperations);
 }
 
-
 async function countOrders(req, res) {
   const count = await Order.countDocuments();
   res.json({ count });
@@ -294,5 +306,5 @@ export {
   reOrder,
   makeDiscount,
   confirmPayment,
-  countOrders
+  countOrders,
 };

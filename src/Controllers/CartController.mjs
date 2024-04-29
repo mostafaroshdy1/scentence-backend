@@ -21,6 +21,7 @@ async function add(req, res) {
   if (!product) {
     throw new ExpressError("Invalid Product ID", 404);
   }
+  if (product.stock < 1) throw new ExpressError("Out of stock", 400);
   const stock = product.stock;
   const productToCart = {
     productId: product._id,

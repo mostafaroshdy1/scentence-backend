@@ -28,6 +28,8 @@ const userSchema = mongoose.Schema({
     type: String,
     default: 'user',
   },
+  fullName: { type: String, minlength: [3, 'full name must be at least 6 characters long'] },
+  birthDate: { type: Date },
 });
 //After Saving Event
 userSchema.post('save', (doc, next) => {

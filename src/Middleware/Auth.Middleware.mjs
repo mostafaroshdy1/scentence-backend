@@ -8,12 +8,14 @@ const requireAuth = (req, res, next) => {
   if (!authHeader) {
     return res.status(401).json({ error: "Authorization header is missing" });
   }
-
+  
   const token = authHeader.split(" ")[1];
   if (token) {
-    jwt.verify(token, "iti os 44", (err, decodedToken) => {
-      if (err && decodedToken.verified == false) {
-        console.log(err.message);
+    console.log(token);
+    jwt.verify(token, process.env.JWT_KEY, (err, decodedToken) => {
+      if (err || decodedToken.verified == false) {
+        console.log(decodedToken);
+        console.log("error message->",err.message);
         return res.status(403).json({ Status: 403, msg: "Not Authorized" });
       } else {
         console.log("Auth", decodedToken);

@@ -7,8 +7,8 @@ import { catchAsync } from '../utils/catchAsync.mjs';
 import jwt from "jsonwebtoken";
 
 const maxAge = 3 * 24 * 60 * 60 * 60;
-const createToken = (id, email,role) => {
-  return jwt.sign({ id, email, role }, "iti os 44", {
+const createToken = (id, email,role,username,verified) => {
+  return jwt.sign({ id, email, role,username,verified }, process.env.JWT_KEY, {
     expiresIn: maxAge,
   });
 };
@@ -129,7 +129,7 @@ const emailUpdate = async (req, res) => {
 	);
 
 	if (user) {
-		const token = createToken(user._id, user.email, user.role);
+		const token = createToken(user._id, user.email, user.role,user.username,user.verified);
     const subject = "Account Verification";
     const text = "Please Verify your account";
     const route = "/User/verify/";
@@ -157,6 +157,7 @@ const deleteUser = catchAsync(async (req, res) => {
 });
 
 const getUsers = catchAsync(async (req, res) => {
+  
   const users = await UserModel.aggregate([
     {
       $match: {
@@ -167,6 +168,7 @@ const getUsers = catchAsync(async (req, res) => {
   if (!users) {
     return res.status(400).json({ Status: 400, error: 'No Users Found' });
   }
+  console.log(users);
   return res.status(200).json({ Status: 200, Users: users });
 });
 

@@ -35,7 +35,7 @@ function checkUser(req, res, next) {
   const token = authHeader.split(" ")[1];
   if (!token) throw new ExpressError("Jwt bearer token is required", 400);
   try {
-    const decodedToken = jwt.verify(token, "iti os 44");
+    const decodedToken = jwt.verify(token, process.env.JWT_KEY);
     req.decodedUser = decodedToken;
     next();
   } catch (err) {

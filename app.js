@@ -20,6 +20,7 @@ import Order from "./src/Model/Order.mjs";
 import Product from "./src/Model/Product.mjs";
 
 import { router as profileRoutes } from './src/Routes/profile.route.mjs';
+import { sendMail } from "./src/Controllers/contactUsEmail.Controller.mjs";
 
 connectToDB();
 const PORT = process.env.PORT || 3000;
@@ -44,6 +45,7 @@ app.use("/cart", cartRoutes);
 app.use("/orders", orderRoutes);
 app.use("/wishlist", wishListRoutes);
 app.use('/profile', profileRoutes);
+app.get('/contact-us-email', sendMail)
 
 //  Any Invalid routes
 app.all("*", (req, res, next) => {

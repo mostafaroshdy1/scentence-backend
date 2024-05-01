@@ -2,19 +2,11 @@ import { UserModel } from "../Model/User.Model.mjs";
 import { validationResult } from "express-validator";
 import { sendVerificationEmail } from "../utils/sendmail.mjs";
 import jwt from "jsonwebtoken";
-const maxAge = "1d";
+
 const createToken = (id, email, role) => {
   return jwt.sign({ id, email, role }, process.env.JWT_KEY, {
-    expiresIn: maxAge,
+    expiresIn: process.env.JWT_EXPIRE_DURATION,
   });
-};
-
-const signup_get = (req, res) => {
-  //res.render("signup");
-};
-
-const login_get = (req, res) => {
-  //res.render("login");
 };
 
 const signup_post = async (req, res) => {
@@ -63,6 +55,6 @@ const login_post = async (req, res) => {
   }
 };
 
-const Auth_Con = { signup_get, login_get, signup_post, login_post };
+const Auth_Con = { signup_post, login_post };
 
 export { Auth_Con };

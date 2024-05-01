@@ -9,17 +9,12 @@ import orderRoutes from "./src/Routes/order.route.mjs";
 import cors from "cors";
 import { router as webhookRoutes } from "./src/Routes/webhook.route.mjs";
 
-import mongoose from "mongoose";
-
 import dotenv from "dotenv";
 dotenv.config();
 
 import { router as cartRoutes } from "./src/Routes/Cart.mjs";
 import { router as wishListRoutes } from "./src/Routes/wishList.route.mjs";
-import Order from "./src/Model/Order.mjs";
-import Product from "./src/Model/Product.mjs";
-
-import { router as profileRoutes } from './src/Routes/profile.route.mjs';
+import { router as profileRoutes } from "./src/Routes/profile.route.mjs";
 import { sendMail } from "./src/Controllers/contactUsEmail.Controller.mjs";
 
 connectToDB();
@@ -32,20 +27,16 @@ app.use("/webhooks", webhookRoutes);
 app.use(express.json()); // for parsing application/json
 app.use(express.urlencoded({ extended: true })); // for parsing application/x-www-form-urlencoded
 
-// app.use('/users', routeName);
-// app.use('/etc', routeName);
-// app.use('/etc', routeName);
 app.use(AuthRoutes);
 app.use(checkUser);
-
 
 app.use("/User", UserRoutes);
 app.use("/products", productRouter);
 app.use("/cart", cartRoutes);
 app.use("/orders", orderRoutes);
 app.use("/wishlist", wishListRoutes);
-app.use('/profile', profileRoutes);
-app.get('/contact-us-email', sendMail)
+app.use("/profile", profileRoutes);
+app.get("/contact-us-email", sendMail);
 
 //  Any Invalid routes
 app.all("*", (req, res, next) => {

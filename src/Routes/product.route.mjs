@@ -22,9 +22,9 @@ const upload = multerFn(validationType.image);
 
 router.get("/count", countProducts);
 
-router.get("/:id", getProductById);
-
 router.get("/categoryCount", getCategoryProductCount);
+
+router.get("/:id", getProductById);
 
 router.post(
   "/",
@@ -35,7 +35,6 @@ router.post(
 );
 
 router.get("/", getAllProducts);
-
 
 router.put(
   "/:id",

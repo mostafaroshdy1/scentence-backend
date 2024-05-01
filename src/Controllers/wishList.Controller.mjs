@@ -46,13 +46,13 @@ async function add(req, res) {
     throw new ExpressError(error.message, error.statusCode);
   }
   if (!req.body.reorder) {
-    return res.send(wishList);
+    return res.json(wishList);
   }
 }
 async function get(req, res) {
   const { email } = req.decodedUser;
   const wishList = await getFromRedis(email);
-  return res.send(wishList);
+  return res.json(wishList);
 }
 async function update(req, res) {
   const { email } = req.decodedUser;
@@ -63,7 +63,7 @@ async function update(req, res) {
   } catch (error) {
     throw new ExpressError("redis storing error", 500);
   }
-  return res.send(wishList);
+  return res.json(wishList);
 }
 async function destroy(req, res) {
   const { email } = req.decodedUser;
@@ -72,7 +72,7 @@ async function destroy(req, res) {
   } catch {
     throw new ExpressError("redis deletion error", 500);
   }
-  return res.send("WishList deleted successfully");
+  return res.json("WishList deleted successfully");
 }
 
 async function getFromRedis(email) {

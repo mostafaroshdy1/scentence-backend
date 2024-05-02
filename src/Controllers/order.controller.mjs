@@ -126,12 +126,12 @@ const createOrder = catchAsync(async (req, res) => {
 });
 
 const getAllOrders = catchAsync(async (req, res) => {
-  const orders = await Order.find();
+  const orders = await Order.find().populate("user");
   res.status(200).json(orders);
 });
 const getOrderById = catchAsync(async (req, res) => {
   const orderId = new mongoose.Types.ObjectId(req.params.id);
-  const order = await Order.findById(orderId);
+  const order = await Order.findById(orderId).populate("user");
   const products = await Product.find({
     _id: { $in: Array.from(order.products.keys()) },
   });
@@ -180,7 +180,7 @@ const cancelOrder = catchAsync(async (req, res) => {
 const viewOrdersOfUser = catchAsync(async (req, res) => {
   const userId = req.decodedUser.id;
 
-  const orders = await Order.find({ user: userId });
+  const orders = await Order.find({ user: userId }).populate("user");
   res.status(200).json(orders);
 });
 const reOrder = catchAsync(async (req, res) => {

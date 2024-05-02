@@ -264,12 +264,14 @@ async function confirmPayment(req, res) {
         { paymentId: session.id },
         { currentStatus: "accepted" }
       );
+      break;
     case "checkout.session.expired":
       const order = await Order.findOneAndUpdate(
         { paymentId: session.id },
         { currentStatus: "cancelled" }
       );
       await reStock(order._id);
+      break;
     default:
   }
   res.send();

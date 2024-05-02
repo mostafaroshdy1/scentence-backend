@@ -14,12 +14,8 @@ const requireAuth = (req, res, next) => {
     console.log(token);
     jwt.verify(token, process.env.JWT_KEY, (err, decodedToken) => {
       if (err || decodedToken.verified == false) {
-        console.log(decodedToken);
-        console.log("error message->",err.message);
         return res.status(403).json({ Status: 403, msg: "Not Authorized" });
       } else {
-        console.log("Auth", decodedToken);
-        console.log(decodedToken);
         next();
       }
     });

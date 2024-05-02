@@ -1,5 +1,4 @@
 import { UserModel } from "../Model/User.Model.mjs";
-import { VerificationModel } from "../Model/Verification.Model.mjs";
 import { validationResult } from "express-validator";
 import bcrypt from "bcrypt";
 import { sendVerificationEmail } from "../utils/sendmail.mjs";

@@ -8,7 +8,7 @@ const requireAuth = (req, res, next) => {
   if (!authHeader) {
     return res.status(401).json({ error: "Authorization header is missing" });
   }
-  
+
   const token = authHeader.split(" ")[1];
   if (token) {
     console.log(token);
@@ -26,6 +26,7 @@ const requireAuth = (req, res, next) => {
 
 //Check if the user logged in or not to display the data
 function checkUser(req, res, next) {
+  console.log(req.url);
   const authHeader = req.headers["authorization"];
   if (!authHeader)
     throw new ExpressError("Authorization header is missing", 400);

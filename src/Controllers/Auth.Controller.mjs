@@ -5,6 +5,8 @@ import { VerificationModel } from "../Model/Verification.Model.mjs";
 
 import jwt from "jsonwebtoken";
 
+const baseUrl = process.env.baseUrl || "http://localhost:4200";
+
 const createToken = (id, email, role, username, verified) => {
   return jwt.sign(
     { id, email, role, username, verified },
@@ -112,13 +114,13 @@ const verify = async (req, res) => {
       // return res
       //   .status(200)
       //   .json({ Status: 200, Msg: "User Verified Successfully" });
-      return res.redirect("http://localhost:4200/verify?status=verified");
+      return res.redirect(baseUrl + "/verify?status=verified");
     } else {
-      return res.redirect("http://localhost:4200/verify?status=invalid");
+      return res.redirect(baseUrl + "/verify?status=verified");
     }
   } catch (err) {
     console.log(err);
-    return res.status(400).json({ Status: 400, Error: "Error Occured" });
+    return res.status(400).json({ Status: 400, Error: "Error Occurred" });
   }
 };
 

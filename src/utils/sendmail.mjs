@@ -21,7 +21,12 @@ transporter.verify((err, Success) => {
   }
 });
 
-const sendVerificationEmail = async ({ _id, email }, subject,text,baseRoute) => {
+const sendVerificationEmail = async (
+  { _id, email },
+  subject,
+  text,
+  baseRoute
+) => {
   const currentURL = "http://localhost:3000";
   const uniqueString = crypto.randomBytes(32).toString("hex");
   const mailOptions = {
@@ -32,10 +37,14 @@ const sendVerificationEmail = async ({ _id, email }, subject,text,baseRoute) => 
     <h1 style="text-align: center; color: #007bff;">Welcome to Our Platform!</h1>
     <p style="font-size: 16px; color: #333; line-height: 1.6;">${text}</p>
     <div style="text-align: center; margin-top: 30px;">
-      <a href="${currentURL + baseRoute + _id + "/" + uniqueString}" style="display: inline-block; padding: 15px 40px; background-color: #007bff; color: #fff; text-decoration: none; border-radius: 5px; font-size: 18px;">Verify Email</a>
+      <a href="${
+        currentURL + baseRoute + _id + "/" + uniqueString
+      }" style="display: inline-block; padding: 15px 40px; background-color: #007bff; color: #fff; text-decoration: none; border-radius: 5px; font-size: 18px;">Verify Email</a>
     </div>
     <p style="font-size: 14px; color: #777; margin-top: 20px; text-align: center;">If you're having trouble clicking the button, copy and paste the URL below into your web browser:</p>
-    <p style="font-size: 14px; color: #007bff; text-align: center;">${currentURL + baseRoute + _id + "/" + uniqueString}</p>
+    <p style="font-size: 14px; color: #007bff; text-align: center;">${
+      currentURL + baseRoute + _id + "/" + uniqueString
+    }</p>
   </div>`,
   };
 

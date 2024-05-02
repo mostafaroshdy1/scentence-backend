@@ -27,7 +27,7 @@ const sendVerificationEmail = async (
   text,
   baseRoute
 ) => {
-  const currentURL = "http://localhost:3000";
+  const currentURL = process.env.baseUrl || "http://localhost:3000";
   const uniqueString = crypto.randomBytes(32).toString("hex");
   const mailOptions = {
     from: process.env.AUTH_EMAIL,

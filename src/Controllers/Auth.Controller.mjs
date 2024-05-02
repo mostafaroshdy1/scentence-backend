@@ -1,12 +1,18 @@
 import { UserModel } from "../Model/User.Model.mjs";
 import { validationResult } from "express-validator";
 import { sendVerificationEmail } from "../utils/sendmail.mjs";
+import { VerificationModel } from "../Model/Verification.Model.mjs";
+
 import jwt from "jsonwebtoken";
 
-const createToken = (id, email, role ,username,verified) => {
-  return jwt.sign({ id, email, role,username,verified }, process.env.JWT_KEY, {
-    expiresIn: process.env.JWT_EXPIRE_DURATION,
-  });
+const createToken = (id, email, role, username, verified) => {
+  return jwt.sign(
+    { id, email, role, username, verified },
+    process.env.JWT_KEY,
+    {
+      expiresIn: process.env.JWT_EXPIRE_DURATION,
+    }
+  );
 };
 
 const signup_post = async (req, res) => {
@@ -26,7 +32,7 @@ const signup_post = async (req, res) => {
 
   const subject = "Account Verification";
   const text = "Please Verify your account";
-  const route = "/User/verify/";
+  const route = "/verify/";
   sendVerificationEmail(
     { _id: user._id, email: user.email },
     subject,
@@ -34,7 +40,13 @@ const signup_post = async (req, res) => {
     route
   );
 
-  const token = createToken(user._id, user.email, user.role, user.username,user.verified);
+  const token = createToken(
+    user._id,
+    user.email,
+    user.role,
+    user.username,
+    user.verified
+  );
   return res.status(200).json({
     token: token,
     msg: `${username} Registerd Successfully , A Verification Email Sent to your inbox `,
@@ -48,13 +60,65 @@ const login_post = async (req, res) => {
   }
   try {
     const user = await UserModel.login(req.body.email, req.body.password);
-    const token = createToken(user._id, user.email, user.role, user.username,user.verified);
+    const token = createToken(
+      user._id,
+      user.email,
+      user.role,
+      user.username,
+      user.verified
+    );
     return res.status(200).json({ token: token, msg: "Login Success" });
   } catch (error) {
     return res.status(400).json({ Error: error.message });
   }
 };
 
-const Auth_Con = { signup_post, login_post };
+const verify = async (req, res) => {
+  const { id, uuid } = req.params;
+  try {
+    const user = await UserModel.findOne({ _id: id });
+    if (!user) {
+      console.log("No User");
+      return res.status(400).json({ Status: 400, Error: "Invalid Link" });
+    }
+
+    const uid = await VerificationModel.findOne({
+      userID: user._id,
+      uniqueString: uuid,
+    });
+
+    if (!uid) {
+      console.log("No UUID");
+      return res.status(400).json({ Status: 400, Error: "Invalid Link" });
+    }
+
+    const currentDate = new Date();
+
+    if (uid.expireAt < currentDate) {
+      return res.status(400).json({ status: 400, Error: "Link Expired" });
+    }
+
+    const verified = await UserModel.updateOne(
+      {
+        _id: user._id,
+      },
+      {
+        verified: true,
+      }
+    );
+    await VerificationModel.findByIdAndDelete(uid._id);
+
+    if (verified) {
+      return res
+        .status(200)
+        .json({ Status: 200, Msg: "User Verified Successfully" });
+    }
+  } catch (err) {
+    console.log(err);
+    return res.status(400).json({ Status: 400, Error: "Error Occured" });
+  }
+};
+
+const Auth_Con = { signup_post, login_post, verify };
 
 export { Auth_Con };

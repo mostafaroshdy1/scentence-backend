@@ -10,4 +10,6 @@ AuthRoutes.post("/signup", validateSignup, Auth_Con.signup_post);
 
 AuthRoutes.post("/login", validateLogin, Auth_Con.login_post);
 
+AuthRoutes.get("/verify/:id/:uuid", Auth_Con.verify);
+
 export { AuthRoutes };

@@ -143,14 +143,14 @@ const getOrderById = catchAsync(async (req, res) => {
 });
 
 const updateOrderById = catchAsync(async (req, res) => {
-  const status = req.body.status;
+  const currentStatus = req.body.currentStatus;
   const foundOrder = await Order.findById(req.params.id);
 
   if (!foundOrder) {
     return res.status(404).json({ message: "Order Not Found" });
   }
 
-  foundOrder.status = status;
+  foundOrder.currentStatus = currentStatus;
   await foundOrder.save();
 
   return res.status(200).json(foundOrder);
@@ -168,8 +168,8 @@ const cancelOrder = catchAsync(async (req, res) => {
   if (!order) {
     return res.status(404).json({ message: "Order Not Found" });
   }
-  if (order.status === "pending") {
-    order.status = "cancelled";
+  if (order.currentStatus === "pending") {
+    order.currentStatus = "cancelled";
     await order.save();
     await reStock(order._id);
     return res.status(200).json(order);
@@ -191,9 +191,9 @@ const reOrder = catchAsync(async (req, res) => {
     return res.status(404).json({ message: "Order Not Found" });
   }
   if (
-    order.status === "pending" ||
-    order.status === "on way" ||
-    order.status === "accepted"
+    order.currentStatus === "pending" ||
+    order.currentStatus === "on way" ||
+    order.currentStatus === "accepted"
   ) {
     return res.status(400).json({ message: "Order is not delivered yet" });
   }
@@ -262,12 +262,12 @@ async function confirmPayment(req, res) {
     case "checkout.session.completed":
       await Order.findOneAndUpdate(
         { paymentId: session.id },
-        { status: "accepted" }
+        { currentStatus: "accepted" }
       );
     case "checkout.session.expired":
       const order = await Order.findOneAndUpdate(
         { paymentId: session.id },
-        { status: "cancelled" }
+        { currentStatus: "cancelled" }
       );
       await reStock(order._id);
     default:

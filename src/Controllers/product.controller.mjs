@@ -56,7 +56,7 @@ const getAllProducts = catchAsync(async (req, res) => {
   let sortCriteria = {};
   switch (sortBy) {
     case 1:
-      sortCriteria = { title: 1 };
+      sortCriteria = { title: -1 };
       break;
     case 2:
       sortCriteria = { price: 1 };
@@ -71,7 +71,7 @@ const getAllProducts = catchAsync(async (req, res) => {
       sortCriteria = { date: 1 };
       break;
     default:
-      sortCriteria = { title: -1 };
+      sortCriteria = { title: 1 };
   }
 
   let findPromise = Product.find({ ...filters, ...searchFilter })

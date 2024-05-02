@@ -109,9 +109,12 @@ const verify = async (req, res) => {
     await VerificationModel.findByIdAndDelete(uid._id);
 
     if (verified) {
-      return res
-        .status(200)
-        .json({ Status: 200, Msg: "User Verified Successfully" });
+      // return res
+      //   .status(200)
+      //   .json({ Status: 200, Msg: "User Verified Successfully" });
+      return res.redirect("http://localhost:4200/verify?status=verified");
+    } else {
+      return res.redirect("http://localhost:4200/verify?status=invalid");
     }
   } catch (err) {
     console.log(err);

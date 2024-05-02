@@ -37,7 +37,7 @@ const AddOrderValidation = [
 ];
 
 const UpdateOrderValidation = [
-  body("status")
+  body("currentStatus")
     .notEmpty()
     .withMessage("Status is required")
     .isIn(["accepted", "pending", "rejected", "on way", "delivered"])

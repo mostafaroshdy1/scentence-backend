@@ -72,7 +72,7 @@ const orderSchema = new Schema(
       enum: ["cash", "credit"],
       required: true,
     },
-    status: {
+    currentStatus: {
       type: String,
       enum: [
         "pending",

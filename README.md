@@ -2,6 +2,9 @@
 
 Welcome to the Scentence E-Commerce Backend repository. This README serves as a comprehensive guide to the project's structure, setup instructions, features, API endpoints, additional information, resources, and contributions.
 
+**The frontend repository is [here](https://github.com/mostafaroshdy1/scentence-frontend).**
+
+
 ## Project Overview
 
 Scentence is an innovative e-commerce platform designed to deliver a seamless shopping experience across various product categories. The backend repository houses the server-side code, responsible for handling authentication, product management, order processing, user management, and other essential functionalities.
@@ -90,6 +93,14 @@ Choose the method that best suits your environment and preferences to get the Sc
 - [Multer Documentation](https://www.npmjs.com/package/multer)
 - [Redis Integration with Node.js](https://www.npmjs.com/package/redis)
 - [Docker Documentation](https://docs.docker.com/)
+
+
+## Video Demo
+
+Explore a comprehensive demonstration of the Scentence E-Commerce in action via the following video:
+
+[![Scentence E-Commerce Demo](https://img.youtube.com/vi/FfvFiVY5YCY/0.jpg)](https://www.youtube.com/watch?v=FfvFiVY5YCY)
+
 
 ## Contributors
 

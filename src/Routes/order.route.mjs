@@ -1,4 +1,6 @@
 import express from "express";
+import { isAdmin } from "../Middleware/admin.mjs";
+import { isOwner } from "../Middleware/user.mjs";
 const router = express.Router();
 
 import {
@@ -19,17 +21,21 @@ import {
   UpdateOrderValidation,
 } from "../Validation/orders.mjs";
 
+router.get("/count", isAdmin, countOrders);
 
-router.get("/count", countOrders);
+// Admin routes
+router.get("/allOrders", isAdmin, getAllOrders);
+router.put("/:id", isAdmin, UpdateOrderValidation, updateOrderById);
+router.delete("/:id", isAdmin, deleteOrderById);
+
+// User routes
+router.get("/:id", isOwner, getOrderById);
+router.get("/", isOwner, viewOrdersOfUser);
+
+router.put("/cancel/:id", isOwner, cancelOrder);
 
 router.post("/", AddOrderValidation, createOrder);
-router.get("/allOrders", getAllOrders);
-router.get("/:id", getOrderById);
-router.put("/:id", UpdateOrderValidation, updateOrderById);
-router.delete("/:id", deleteOrderById);
-router.put("/cancel/:id", cancelOrder);
-router.get("/", viewOrdersOfUser);
-router.post("/reOrder/:id", reOrder);
+router.post("/reOrder/:id", isOwner, reOrder);
 router.post("/discount", makeDiscount);
 
 export default router;

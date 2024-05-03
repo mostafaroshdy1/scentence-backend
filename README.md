@@ -104,4 +104,11 @@ Explore a comprehensive demonstration of the Scentence E-Commerce in action via 
 
 Contributions to the enhancement and evolution of the Scentence E-Commerce Backend are warmly welcomed from all passionate developers and enthusiasts.
 
+- @engyahmed7
+- @mostafaroshdy1
+- @MalakNasser
+- @BasmalaMohamed46
+- @Belal-Abo-Ata
+- @Ziad-Elganzory
+
 Feel free to contribute to this project by submitting pull requests or opening issues for any bugs or feature requests.

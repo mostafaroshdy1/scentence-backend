@@ -29,13 +29,13 @@ router.put("/:id", isAdmin, UpdateOrderValidation, updateOrderById);
 router.delete("/:id", isAdmin, deleteOrderById);
 
 // User routes
-router.get("/:id", isOwner, getOrderById);
-router.get("/", isOwner, viewOrdersOfUser);
+router.get("/:id", getOrderById);
+router.get("/", viewOrdersOfUser);
 
-router.put("/cancel/:id", isOwner, cancelOrder);
+router.put("/cancel/:id", cancelOrder);
 
 router.post("/", AddOrderValidation, createOrder);
-router.post("/reOrder/:id", isOwner, reOrder);
+router.post("/reOrder/:id", reOrder);
 router.post("/discount", makeDiscount);
 
 export default router;

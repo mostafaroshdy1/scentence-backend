@@ -16,10 +16,57 @@ import { router as cartRoutes } from "./src/Routes/Cart.mjs";
 import { router as wishListRoutes } from "./src/Routes/wishList.route.mjs";
 import { router as profileRoutes } from "./src/Routes/profile.route.mjs";
 import { sendMail } from "./src/Controllers/contactUsEmail.Controller.mjs";
-
+// import helmet from "helmet";
 connectToDB();
 const PORT = process.env.PORT || 3000;
 const app = express();
+// app.use(helmet());
+
+const whitelist = [
+  "https://scentence.vercel.app",
+  "http://localhost:4200",
+  "a.stripecdn.com",
+  "api.stripe.com",
+  "atlas.stripe.com",
+  "auth.stripe.com",
+  "b.stripecdn.com",
+  "billing.stripe.com",
+  "buy.stripe.com",
+  "c.stripecdn.com",
+  "checkout.stripe.com",
+  "climate.stripe.com",
+  "connect.stripe.com",
+  "dashboard.stripe.com",
+  "express.stripe.com",
+  "files.stripe.com",
+  "hooks.stripe.com",
+  "invoice.stripe.com",
+  "invoicedata.stripe.com",
+  "js.stripe.com",
+  "m.stripe.com",
+  "m.stripe.network",
+  "manage.stripe.com",
+  "pay.stripe.com",
+  "payments.stripe.com",
+  "q.stripe.com",
+  "qr.stripe.com",
+  "r.stripe.com",
+  "verify.stripe.com",
+  "stripe.com",
+  "terminal.stripe.com",
+  "uploads.stripe.com",
+  "https://res.cloudinary.com/dad3cfqgl",
+];
+
+const corsOptions = {
+  origin: function (origin, callback) {
+    if (whitelist.indexOf(origin) !== -1) {
+      callback(null, true);
+    } else {
+      callback(new Error("Not allowed by CORS"));
+    }
+  },
+};
 
 app.use(cors());
 app.use("/webhooks", webhookRoutes);

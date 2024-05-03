@@ -132,7 +132,7 @@ const getAllOrders = catchAsync(async (req, res) => {
 const getOrderById = catchAsync(async (req, res) => {
   const orderId = new mongoose.Types.ObjectId(req.params.id);
   const order = await Order.findById(orderId).populate("user");
-  if (order.user.toString() !== req.decodedUser.id) {
+  if (order.user._id.toString() !== req.decodedUser.id) {
     throw new ExpressError("Unauthorized", 401);
   }
   const products = await Product.find({

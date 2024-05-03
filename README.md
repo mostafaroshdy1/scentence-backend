@@ -96,7 +96,3 @@ Choose the method that best suits your environment and preferences to get the Sc
 Contributions to the enhancement and evolution of the Scentence E-Commerce Backend are warmly welcomed from all passionate developers and enthusiasts.
 
 Feel free to contribute to this project by submitting pull requests or opening issues for any bugs or feature requests.
-
-Contributions to the enhancement and evolution of the Scentence E-Commerce Backend are warmly welcomed from all passionate developers and enthusiasts.
-
-Feel free to contribute to this project by submitting pull requests or opening issues for any bugs or feature requests.

@@ -2,8 +2,9 @@
 
 Welcome to the Scentence E-Commerce Backend repository. This README serves as a comprehensive guide to the project's structure, setup instructions, features, API endpoints, additional information, resources, and contributions.
 
-**The frontend repository is [here](https://github.com/mostafaroshdy1/scentence-frontend).**
+**This project is live and deployed! Access it [here](https://scentence.vercel.app/).**
 
+**The frontend repository is [here](https://github.com/mostafaroshdy1/scentence-frontend).**
 
 ## Project Overview
 
@@ -82,7 +83,6 @@ Choose the method that best suits your environment and preferences to get the Sc
 - **Data Validation and Sanitization:** Input data is rigorously validated and sanitized to prevent security vulnerabilities such as SQL injection and cross-site scripting (XSS) attacks, ensuring robust data integrity and user security.
 - **Robust Error Handling:** Comprehensive error handling mechanisms are implemented to provide informative error messages and ensure a smooth user experience, enhancing user satisfaction and trust.
 
-
 ## Resources
 
 - [Express.js Documentation](https://expressjs.com/)
@@ -94,13 +94,11 @@ Choose the method that best suits your environment and preferences to get the Sc
 - [Redis Integration with Node.js](https://www.npmjs.com/package/redis)
 - [Docker Documentation](https://docs.docker.com/)
 
-
 ## Video Demo
 
 Explore a comprehensive demonstration of the Scentence E-Commerce in action via the following video:
 
 [![Scentence E-Commerce Demo](https://img.youtube.com/vi/FfvFiVY5YCY/0.jpg)](https://www.youtube.com/watch?v=FfvFiVY5YCY)
-
 
 ## Contributors
 

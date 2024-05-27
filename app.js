@@ -16,12 +16,24 @@ import { router as cartRoutes } from "./src/Routes/Cart.mjs";
 import { router as wishListRoutes } from "./src/Routes/wishList.route.mjs";
 import { router as profileRoutes } from "./src/Routes/profile.route.mjs";
 import { sendMail } from "./src/Controllers/contactUsEmail.Controller.mjs";
-
+import helmet from "helmet";
 connectToDB();
 const PORT = process.env.PORT || 3000;
 const app = express();
+app.use(helmet());
 
-app.use(cors());
+const whitelist = process.env.whitelist.split(" ");
+const corsOptions = {
+  origin: function (origin, callback) {
+    if (whitelist.indexOf(origin) !== -1) {
+      callback(null, true);
+    } else {
+      callback(new Error("Not allowed by CORS"));
+    }
+  },
+};
+
+app.use(cors(corsOptions));
 app.use("/webhooks", webhookRoutes);
 
 app.use(express.json()); // for parsing application/json

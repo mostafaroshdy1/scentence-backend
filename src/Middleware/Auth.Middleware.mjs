@@ -11,7 +11,6 @@ const requireAuth = (req, res, next) => {
 
   const token = authHeader.split(" ")[1];
   if (token) {
-    console.log(token);
     jwt.verify(token, process.env.JWT_KEY, (err, decodedToken) => {
       if (err || decodedToken.verified == false) {
         return res.status(403).json({ Status: 403, msg: "Not Authorized" });
@@ -26,7 +25,6 @@ const requireAuth = (req, res, next) => {
 
 //Check if the user logged in or not to display the data
 function checkUser(req, res, next) {
-  console.log(req.url);
   const authHeader = req.headers["authorization"];
   if (!authHeader)
     throw new ExpressError("Authorization header is missing", 400);

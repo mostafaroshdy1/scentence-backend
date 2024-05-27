@@ -132,6 +132,9 @@ const getAllOrders = catchAsync(async (req, res) => {
 const getOrderById = catchAsync(async (req, res) => {
   const orderId = new mongoose.Types.ObjectId(req.params.id);
   const order = await Order.findById(orderId).populate("user");
+  if (order.user._id.toString() !== req.decodedUser.id) {
+    throw new ExpressError("Unauthorized", 401);
+  }
   const products = await Product.find({
     _id: { $in: Array.from(order.products.keys()) },
   });
@@ -165,6 +168,9 @@ const deleteOrderById = catchAsync(async (req, res) => {
 
 const cancelOrder = catchAsync(async (req, res) => {
   const order = await Order.findById(req.params.id);
+  if (order.user.toString() !== req.decodedUser.id) {
+    throw new ExpressError("Unauthorized", 401);
+  }
   if (!order) {
     return res.status(404).json({ message: "Order Not Found" });
   }
@@ -187,6 +193,9 @@ const reOrder = catchAsync(async (req, res) => {
   let cart = [];
   const orderId = req.params.id;
   const order = await Order.findById(orderId);
+  if (order.user.toString() !== req.decodedUser.id) {
+    throw new ExpressError("Unauthorized", 401);
+  }
   if (!order) {
     return res.status(404).json({ message: "Order Not Found" });
   }

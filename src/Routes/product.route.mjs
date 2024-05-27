@@ -1,4 +1,6 @@
 import express from "express";
+import { isAdmin } from "../Middleware/admin.mjs";
+
 const router = express.Router();
 import {
   multerFn,
@@ -20,7 +22,7 @@ import { AddProductValidation } from "../Validation/products.mjs";
 
 const upload = multerFn(validationType.image);
 
-router.get("/count", countProducts);
+router.get("/count", isAdmin, countProducts);
 
 router.get("/categoryCount", getCategoryProductCount);
 
@@ -28,6 +30,7 @@ router.get("/:id", getProductById);
 
 router.post(
   "/",
+  isAdmin,
   upload,
   multerHandelErrors,
   AddProductValidation,
@@ -38,13 +41,14 @@ router.get("/", getAllProducts);
 
 router.put(
   "/:id",
+  isAdmin,
   upload,
   multerHandelErrors,
   AddProductValidation,
   updateProductById
 );
 
-router.delete("/:id", deleteProductById);
+router.delete("/:id", isAdmin, deleteProductById);
 
 router.get("/category/:category", getAllProducts);
 router.post("/rating", addRating);

@@ -189,7 +189,6 @@ const getUsers = catchAsync(async (req, res) => {
   if (!users) {
     return res.status(400).json({ Status: 400, error: "No Users Found" });
   }
-  console.log(users);
   return res.status(200).json({ Status: 200, Users: users });
 });
 
